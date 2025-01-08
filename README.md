@@ -31,4 +31,4 @@ Bem-vindo ao repositório da Equipe 05 no DevTITANS!
 
 ## Contato
 
-Para perguntas, sugestões ou feedback, entre em contato com o mantenedor do projeto em [emidioaranha@gmail.com](mailto:emidioaranha@gmail.com).
+Para perguntas, sugestões ou feedback, entre em contato com o mantenedor do projeto em [emidioaranha21@gmail.com](mailto:emidioaranha21@gmail.com).
