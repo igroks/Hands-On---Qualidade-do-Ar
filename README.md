@@ -31,6 +31,7 @@ Bem-vindo ao repositório da Equipe 05 no DevTITANS!
 - Microcontrolador Esp32
 - Sensor de Gás MQ-9 Monóxido de Carbono e Combustíveis
 - Sensor SDS011 de qualidade do ar
+- Protoboard, Jumpers, Cabo usb
 
 
 ## Uso
