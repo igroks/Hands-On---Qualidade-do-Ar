@@ -15,11 +15,11 @@ Bem-vindo ao repositório da Equipe 05 no DevTITANS!
 <img src="https://github.com/user-attachments/assets/bf121632-4689-4dd5-9def-33471e36d362" width="180" >
 <img src="https://github.com/user-attachments/assets/16f8dbcf-65cd-4908-bc0e-4361bf7788a9" width="180" >  
     
-- **Antonio Fernandes:** Papel principal do aluno(a) 1
-- **Cristiano Goes:** Papel principal do aluno(a) 2
-- **Emidio Aranha:** Papel principal do aluno(a) 3
-- **Igor Carvalho:** Papel principal do aluno(a) 4
-- **Luiz Sena:** Papel principal do aluno(a) 5
+- **Antonio Fernandes:** Firmware e Driver
+- **Cristiano Goes:** Driver
+- **Emidio Aranha:** Organização, Protótipo, firmware
+- **Igor Carvalho:** Organização e Driver
+- **Luiz Sena:** Driver e Port G100
 
 ## Recursos
 
