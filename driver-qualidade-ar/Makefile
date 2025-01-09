@@ -1,4 +1,5 @@
-obj-m += driver_qda.o
+obj-m += driver_qda.o \
+		 probe.o
 PWD := $(CURDIR)
 
 all:
