@@ -2,7 +2,7 @@
 #include <linux/usb.h>
 #include <linux/slab.h>
 
-#define MAX_RECV_LINE 100
+#define MAX_RECV_LINE 200
 #define VENDOR_ID 0x10c4
 #define PRODUCT_ID 0xea60
 

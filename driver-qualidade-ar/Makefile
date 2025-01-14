@@ -1,5 +1,6 @@
 obj-m += driver_qda.o \
-		 probe.o
+		 probe.o \
+		 serial_read.o
 PWD := $(CURDIR)
 
 all:
