@@ -1,44 +1,89 @@
-#include "serial_read.h"
+#include "probe.h"
+#include <linux/string.h>
 
 MODULE_AUTHOR("Equipe Qualidade do Ar <devtitans>");
 MODULE_DESCRIPTION("Módulo para o dispositivo de qualidade do ar via USB");
 MODULE_LICENSE("GPL");
 
-static char recv_line[MAX_RECV_LINE];              // Armazena dados vindos da USB até receber um caractere de nova linha '\n'
+MODULE_DEVICE_TABLE(usb, id_table);
+bool ignore = true;
 
-static int usb_read_serial(void) {
-    int recv_size = 0;                      // Quantidade de caracteres no recv_line
-    int ret, actual_size, i;
-    int retries = 10;                       // Tenta algumas vezes receber uma resposta da USB. Depois desiste.
-    char resp_expected[MAX_RECV_LINE];      // Resposta esperada do comando
-    char *resp_pos;                         // Posição na linha lida que contém o número retornado pelo dispositivo
-    long resp_number = -1;
+module_usb_driver(qda_driver);
+
+static char recv_line[MAX_RECV_LINE];
+
+static AirQualityData *data_recv;
+
+static int usb_probe(struct usb_interface *interface, const struct usb_device_id *id) {
+    struct usb_endpoint_descriptor *usb_endpoint_in, *usb_endpoint_out;
+
+    printk(KERN_INFO "Dispositivo conectado ao serial\n");
+
+    qda_device = interface_to_usbdev(interface);
+    ignore =  usb_find_common_endpoints(interface->cur_altsetting, &usb_endpoint_in, &usb_endpoint_out, NULL, NULL);
+    usb_max_size = usb_endpoint_maxp(usb_endpoint_in);
+    usb_in = usb_endpoint_in->bEndpointAddress;
+    usb_out = usb_endpoint_out->bEndpointAddress;
+    usb_in_buffer = kmalloc(usb_max_size, GFP_KERNEL);
+    usb_out_buffer = kmalloc(usb_max_size, GFP_KERNEL);
+
+    int code = usb_read_serial();
+
+    if(code == 0) {
+        printk(KERN_INFO "Driver Qualidade do Ar: Dado recebido com sucesso!");
+    } else if(code == -1) {
+        printk(KERN_ERR "Driver Qualidade do Ar: Dado foi perdido.");
+    } else if(code == -2) {
+        printk(KERN_ERR "Driver Qualidade do Ar: Não foi possível se ler do USB");
+    }
+
+
+    return 0;
+}
+
+static void usb_disconnect(struct usb_interface *interface) {
+    printk(KERN_INFO "Dispositivo desconectado do serial\n");
+    kfree(usb_in_buffer);
+    kfree(usb_out_buffer);
+}
+
+static int usb_read_serial() {
+    int ret, actual_size, i, pos = 0;
+    int retries = 10;
 
     while (retries > 0) {
 
-        // Lê dados da USB
-        ret = usb_bulk_msg(smartlamp_device, usb_rcvbulkpipe(smartlamp_device, usb_in), usb_in_buffer, min(usb_max_size, MAX_RECV_LINE), &actual_size, HZ*1000);
+        ret = usb_bulk_msg(qda_device, usb_rcvbulkpipe(qda_device, usb_in), usb_in_buffer, min(usb_max_size, MAX_RECV_LINE), &actual_size, 1000);
         if (ret) {
-            printk(KERN_ERR "SmartLamp: Erro ao ler dados da USB (tentativa %d). Codigo: %d\n", ret, retries--);
+            printk(KERN_ERR "Driver Qualidade do Ar: Erro ao ler dados da USB (tentativa %d).\n", retries--);
             continue;
         }
 
-        // Para cada caractere recebido ...
-        for (i=0; i<actual_size; i++) {
 
-            if (usb_in_buffer[i] == '\n') {  // Temos uma linha completa
-                recv_line[recv_size] = '\0';
-                printk(KERN_INFO "SmartLamp: Recebido uma linha: '%s'\n", recv_line);
-
-                printk(KERN_INFO "%s", recv_line);
-
-            }
-            else { // É um caractere normal (sem ser nova linha), coloca no recv_line e lê o próximo caractere
-                recv_line[recv_size] = usb_in_buffer[i];
-                recv_size++;
-            }
+        for(i = 0; i < actual_size; i++) {
+            recv_line[pos] = usb_in_buffer[i];
+            pos++;
         }
+
+        recv_line[pos] = '\0';
+        char * pointer = strstr(recv_line, "###");
+        if(pointer != NULL && *(pointer + 3 + sizeof(AirQualityData)) == '#') {
+            struct AirQualityData *data;
+            data = (struct AirQualityData*)(pointer + 3);
+            if(data == NULL) {
+                return -1;
+            }
+            // *data_recv = *data;
+            printk(KERN_INFO "Driver Qualidade do Ar: Data recebida");
+            printk(KERN_INFO "pm2_5: %d", data->pm2_5);
+            printk(KERN_INFO "pm10: %d", data->pm10);
+            printk(KERN_INFO "isValid: %d", data->isValid);
+
+
+            return 0;
+        }
+
     }
 
-    return -1; 
+    return -2; 
 }

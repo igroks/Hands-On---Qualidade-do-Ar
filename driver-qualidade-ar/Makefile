@@ -3,6 +3,8 @@ obj-m += driver_qda.o \
 		 serial_read.o
 PWD := $(CURDIR)
 
+# EXTRA_CFLAGS := -msoft-float -msse -msse2 -msse3 -msse4
+
 all:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 
