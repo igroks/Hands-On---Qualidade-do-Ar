@@ -1,7 +1,8 @@
 obj-m += driver_qda.o \
 		 probe.o \
 		 serial_read.o \
-		 serial_write.o
+		 serial_write.o \
+		 sysfshiu.o 
 PWD := $(CURDIR)
 
 # EXTRA_CFLAGS := -msoft-float -msse -msse2 -msse3 -msse4

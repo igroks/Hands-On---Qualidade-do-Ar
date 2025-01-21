@@ -52,10 +52,6 @@ static int usb_write_serial(char *cmd, int param) {
         return -1;
     }
 
-
-
-    // Use essa variavel para fazer a integração com a função usb_read_serial
-    // resp_expected deve conter a resposta esperada do comando enviado e deve ser comparada com a resposta recebida
     sprintf(resp_expected, "RES %s", cmd);
 
     return -1; 
