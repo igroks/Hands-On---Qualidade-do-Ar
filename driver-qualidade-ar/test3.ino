@@ -10,7 +10,6 @@ void loop() {
   if(Serial.available() > 0) {
     String cmd = Serial.readString();
     processCommand(cmd);
-    
   }
 }
 
