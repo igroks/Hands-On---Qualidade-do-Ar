@@ -24,6 +24,11 @@ struct MQ9 {
   float R0; 
 }
 
+struct AllData {
+  AirQualityData data1;
+  MQ9 Data2;
+}
+
 int alert = 0;
 
 // Função para ler os dados da serial
@@ -58,7 +63,7 @@ void writeToSerial(const byte* command, size_t length) {
 }
 
 MQ9 readMq9() {
-  MQ9 data = {0, 0, 0, 0, 0};
+  MQ9 data = {0, 0, 0, 0.91};
   int sensorValue = analogRead(AO);
   float volt;
   float gas;
@@ -79,20 +84,21 @@ void setup() {
   Serial.begin(9600);
   delay(100);
   Serial.println("Initializing SDS011 Air Quality Monitor...");
-
   // Inicializa a comunicação HardwareSerial com o SDS011
   sds.begin(9600, SERIAL_8N1, SDS_RX, SDS_TX);
- 
   // Exemplo: enviar comando para colocar o sensor no modo de espera
   byte sleepCommand[] = {0xAA, 0xB4, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x05, 0xAB};
   writeToSerial(sleepCommand, sizeof(sleepCommand));
+
+  pinMode(DO, INPUT);
 }
 
 void loop() {
   AirQualityData data = readSDS011();
   MQ9 data2 = readMq9();
-  alert = digitalRead(DO);
-  
+  //alert = digitalRead(DO);
+
+  /*
   if (data.isValid) {
     Serial.print("PM2.5: ");
     Serial.print(data.pm2_5, 2);
@@ -103,17 +109,24 @@ void loop() {
   } else {
     Serial.println("Failed to read valid data from SDS011.");
   }
-
+ /*
   Serial.print("sensor_volt: ");
   serial.print(data2.sensor_volt);
   Serial.print(", RS_gas: ");
   serial.print(data.RS_gas);
   Serial.print(", ratio: ");
   serial.print(data.ratio);
+  */
+  
+  if(data.isValid) {
+    
+  } else {
+    
+  }
 
 
   if(alert==1) digitalWrite(LED, HIGH);
   else if(alert == 0) digitalWrite(LED, lOW);
   
-  delay(5000);
+  delay(1000);
 }
