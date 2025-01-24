@@ -7,33 +7,47 @@ MODULE_AUTHOR("DevTITANS <devtitans@icomp.ufam.edu.br>");
 MODULE_DESCRIPTION("Driver de acesso ao SmartLamp (ESP32 com Chip Serial CP2102");
 MODULE_LICENSE("GPL");
 
+#define MAX_RECV_LINE 100
 
-#define MAX_RECV_LINE 100 // Tamanho máximo de uma linha de resposta do dispositvo USB
+typedef struct AirQualityData {
+  int pm2_5;
+  int pm10;
+  bool isValid;
+} AirQualityData;
 
+typedef struct MQ9 {
+  int sensor_volt;
+  int RS_gas;
+  int ratio;
+} MQ9;
 
-static struct usb_device *smartlamp_device;        // Referência para o dispositivo USB
-static uint usb_in, usb_out;                       // Endereços das portas de entrada e saida da USB
-static char *usb_in_buffer, *usb_out_buffer;       // Buffers de entrada e saída da USB
-static int usb_max_size;                           // Tamanho máximo de uma mensagem USB
+typedef struct AllData {
+  AirQualityData data1;
+  MQ9 Data2;
+} AllData;
+
+static AllData* sensor_data;
+
+static struct usb_device *smartlamp_device;
+static uint usb_in, usb_out;
+static char *usb_in_buffer, *usb_out_buffer;
+static int usb_max_size;
 
 #define VENDOR_ID 0x10c4
 #define PRODUCT_ID 0xea60
 static const struct usb_device_id id_table[] = { { USB_DEVICE(VENDOR_ID, PRODUCT_ID) }, {} };
 
-static int  usb_probe(struct usb_interface *ifce, const struct usb_device_id *id); // Executado quando o dispositivo é conectado na USB
-static void usb_disconnect(struct usb_interface *ifce);                           // Executado quando o dispositivo USB é desconectado da USB
+static int  usb_probe(struct usb_interface *ifce, const struct usb_device_id *id);
+static void usb_disconnect(struct usb_interface *ifce);
 static int  usb_read_serial(void);   
 
-// Executado quando o arquivo /sys/kernel/smartlamp/{led, ldr} é lido (e.g., cat /sys/kernel/smartlamp/led)
 static ssize_t attr_show(struct kobject *sys_obj, struct kobj_attribute *attr, char *buff);
-// Executado quando o arquivo /sys/kernel/smartlamp/{led, ldr} é escrito (e.g., echo "100" | sudo tee -a /sys/kernel/smartlamp/led)
 static ssize_t attr_store(struct kobject *sys_obj, struct kobj_attribute *attr, const char *buff, size_t count);   
 
-// Variáveis para criar os arquivos no /sys/kernel/smartlamp/{led, ldr}
 static struct kobj_attribute  sensor_attribute = __ATTR(sensor, S_IRUGO | S_IWUSR, attr_show, attr_store);
 static struct attribute      *attrs[]       = { &sensor_attribute.attr, NULL };
 static struct attribute_group attr_group    = { .attrs = attrs };
-static struct kobject        *sys_obj;                                             // Executado para ler a saida da porta serial
+static struct kobject        *sys_obj;
 
 MODULE_DEVICE_TABLE(usb, id_table);
 
@@ -41,27 +55,24 @@ bool ignore = true;
 int LDR_value = 0;
 
 static struct usb_driver smartlamp_driver = {
-    .name        = "smartlamp",     // Nome do driver
-    .probe       = usb_probe,       // Executado quando o dispositivo é conectado na USB
-    .disconnect  = usb_disconnect,  // Executado quando o dispositivo é desconectado na USB
-    .id_table    = id_table,        // Tabela com o VendorID e ProductID do dispositivo
+    .name        = "smartlamp",
+    .probe       = usb_probe,
+    .disconnect  = usb_disconnect,
+    .id_table    = id_table,
 };
 
 module_usb_driver(smartlamp_driver);
 
-// Executado quando o dispositivo é conectado na USB
 static int usb_probe(struct usb_interface *interface, const struct usb_device_id *id) {
     struct usb_endpoint_descriptor *usb_endpoint_in, *usb_endpoint_out;
 
     printk(KERN_INFO "SmartLamp: Dispositivo conectado ...\n");
 
-    // Cria arquivos do /sys/kernel/smartlamp/*
     sys_obj = kobject_create_and_add("qualidade_ar", kernel_kobj);
-    ignore = sysfs_create_group(sys_obj, &attr_group); // AQUI
+    ignore = sysfs_create_group(sys_obj, &attr_group);
 
-    // Detecta portas e aloca buffers de entrada e saída de dados na USB
     smartlamp_device = interface_to_usbdev(interface);
-    ignore =  usb_find_common_endpoints(interface->cur_altsetting, &usb_endpoint_in, &usb_endpoint_out, NULL, NULL);  // AQUI
+    ignore =  usb_find_common_endpoints(interface->cur_altsetting, &usb_endpoint_in, &usb_endpoint_out, NULL, NULL);
     usb_max_size = usb_endpoint_maxp(usb_endpoint_in);
     usb_in = usb_endpoint_in->bEndpointAddress;
     usb_out = usb_endpoint_out->bEndpointAddress;
@@ -71,11 +82,10 @@ static int usb_probe(struct usb_interface *interface, const struct usb_device_id
     return 0;
 }
 
-// Executado quando o dispositivo USB é desconectado da USB
 static void usb_disconnect(struct usb_interface *interface) {
     printk(KERN_INFO "SmartLamp: Dispositivo desconectado.\n");
-    if (sys_obj) kobject_put(sys_obj);      // Remove os arquivos em /sys/kernel/smartlamp
-    kfree(usb_in_buffer);                   // Desaloca buffers
+    if (sys_obj) kobject_put(sys_obj);
+    kfree(usb_in_buffer);
     kfree(usb_out_buffer);
 }
 
@@ -83,15 +93,11 @@ static char recv_line[MAX_RECV_LINE];
 
 static int usb_write_serial(char *cmd, int param) {
     int ret, actual_size;    
-    char resp_expected[MAX_RECV_LINE];      // Resposta esperada do comando  
+    char resp_expected[MAX_RECV_LINE];
     
-    // use a variavel usb_out_buffer para armazernar o comando em formato de texto que o firmware reconheça
-
     sprintf(usb_out_buffer, "%s %d\n", cmd, param);
     printk(KERN_INFO "Buffer eh: %s", usb_out_buffer);
-    // Grave o valor de usb_out_buffer com printk
 
-    // Envie o comando pela porta Serial
     ret = usb_bulk_msg(smartlamp_device, usb_sndbulkpipe(smartlamp_device, usb_out), usb_out_buffer, strlen(usb_out_buffer), &actual_size, 1000);
     if (ret) {
         printk(KERN_ERR "SmartLamp: Erro de codigo %d ao enviar comando!\n", ret);
@@ -126,13 +132,20 @@ static int usb_read_serial() {
         for(i = 0; i < pos; i++) {
             if(recv_line[i] == '\n') {
                 recv_line[pos] = '\0';
-                char * pointer = strstr(recv_line, "RES");
+                char * pointer = (char*)strstr(recv_line, "RES");
+                sensor_data = (AllData*)(pointer + 4);
+                int value = 1;
+                // sscanf(pointer, "RES %p", &sensor_data);
+                // printk(KERN_INFO "Lalalala: %d", value);
 
-                long value;
-                sscanf(pointer, "RES %d", &value);
+                printk(KERN_INFO "Dado recebido: isValid = %d", sensor_data->data1.isValid);
+                printk(KERN_INFO "Dado recebido: pm10 = %d", (int)sensor_data->data1.pm10);
+                printk(KERN_INFO "Dado recebido: pm2_5 = %d", (int)sensor_data->data1.pm2_5);
+                printk(KERN_INFO "Dado recebido: ratio = %d", (int)sensor_data->Data2.ratio);
+                printk(KERN_INFO "Dado recebido: RSGas = %d", (int)sensor_data->Data2.RS_gas);
+                printk(KERN_INFO "Dado recebido: sensorVolt = %d", (int)sensor_data->Data2.sensor_volt);
 
-                printk(KERN_INFO "Lalalala: %d", value);
-    
+
                 return value;
             }
         }
@@ -142,32 +155,21 @@ static int usb_read_serial() {
     return -2;
 }
 
-// Executado quando o arquivo /sys/kernel/smartlamp/{led, ldr} é lido (e.g., cat /sys/kernel/smartlamp/led)
 static ssize_t attr_show(struct kobject *sys_obj, struct kobj_attribute *attr, char *buff) {
-    // value representa o valor do led ou ldr
     int value = -1;
-    // attr_name representa o nome do arquivo que está sendo lido (ldr ou led)
     const char *attr_name = attr->attr.name;
 
-    // printk indicando qual arquivo está sendo lido
     printk(KERN_INFO "SmartLamp: Lendo %s ...\n", attr_name);
 
-    // Implemente a leitura do valor do led usando a função usb_read_serial()
-
     value = usb_read_serial();
-
-    sprintf(buff, "Haha, eh %d\n", value);                   // Cria a mensagem com o valor do led, ldr
+    sprintf(buff, "Haha, eh %d\n", value);
     return strlen(buff);
 }
 
-
-// Essa função não deve ser alterada durante a task sysfs
-// Executado quando o arquivo /sys/kernel/smartlamp/{led, ldr} é escrito (e.g., echo "100" | sudo tee -a /sys/kernel/smartlamp/led)
 static ssize_t attr_store(struct kobject *sys_obj, struct kobj_attribute *attr, const char *buff, size_t count) {
     long ret, value;
     const char *attr_name = attr->attr.name;
 
-    // Converte o valor recebido para long
     ret = kstrtol(buff, 10, &value);
     if (ret) {
         printk(KERN_ALERT "SmartLamp: valor de %s invalido.\n", attr_name);
@@ -177,7 +179,6 @@ static ssize_t attr_store(struct kobject *sys_obj, struct kobj_attribute *attr, 
     printk(KERN_INFO "SmartLamp: Setando %s para %ld ...\n", attr_name, value);
 
     usb_write_serial("SET", value);
-
 
     if (ret < 0) {
         printk(KERN_ALERT "SmartLamp: erro ao setar o valor do %s.\n", attr_name);

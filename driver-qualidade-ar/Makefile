@@ -6,6 +6,7 @@ obj-m += driver_qda.o \
 PWD := $(CURDIR)
 
 # EXTRA_CFLAGS := -msoft-float -msse -msse2 -msse3 -msse4
+# CC_FLAGS_NO_FPU := -mhard-float
 
 all:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
