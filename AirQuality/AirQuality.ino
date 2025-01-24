@@ -12,24 +12,24 @@ HardwareSerial sds(2); // Use Serial1 para o SDS011 (no ESP32, Serial1 é custom
 
 // Estrutura para armazenar os valores do sensor
 struct AirQualityData {
-  float pm2_5;
-  float pm10;
+  int pm2_5;
+  int pm10;
   bool isValid; // Indica se os dados são válidos
 };
 
 struct MQ9 {
-  float sensor_volt;
-  float RS_gas;
-  float ratio;
-  float R0; 
-}
+  int sensor_volt;
+  int RS_gas;
+  int ratio; 
+};
 
 struct AllData {
   AirQualityData data1;
-  MQ9 Data2;
-}
+  MQ9 data2;
+};
 
 int alert = 0;
+float R0 = 0.91;
 
 // Função para ler os dados da serial
 AirQualityData readSDS011() {
@@ -49,8 +49,10 @@ AirQualityData readSDS011() {
     if (buffer[9] == 0xAB) {
       int pm25int = (buffer[3] << 8) | buffer[2];
       int pm10int = (buffer[5] << 8) | buffer[4];
-      data.pm2_5 = pm25int / 10.0;
-      data.pm10 = pm10int / 10.0;
+      //data.pm2_5 = pm25int / 10.0;
+      //data.pm10 = pm10int / 10.0;
+      data.pm2_5 = pm25int;
+      data.pm10 = pm10int;
       data.isValid = true;
     }
   }
@@ -63,18 +65,18 @@ void writeToSerial(const byte* command, size_t length) {
 }
 
 MQ9 readMq9() {
-  MQ9 data = {0, 0, 0, 0.91};
+  MQ9 data = {0, 0, 0};
   int sensorValue = analogRead(AO);
   float volt;
   float gas;
   float ratio;
   volt = ((float)sensorValue/1024) * 5.0;
   gas = (5.0 - volt) / volt; 
-  ratio = gas / data.R0;
+  ratio = gas / R0;
 
-  data.sensor_volt = volt;
-  data.RS_gas = gas;
-  data.ratio = ratio;
+  data.sensor_volt = volt * 100;
+  data.RS_gas = gas * 100;
+  data.ratio = ratio * 100; 
 
   return data;
 }
@@ -94,39 +96,70 @@ void setup() {
 }
 
 void loop() {
-  AirQualityData data = readSDS011();
-  MQ9 data2 = readMq9();
-  //alert = digitalRead(DO);
 
-  /*
-  if (data.isValid) {
-    Serial.print("PM2.5: ");
-    Serial.print(data.pm2_5, 2);
-    Serial.print(" ug/m3  ");
-    Serial.print("PM10: ");
-    Serial.print(data.pm10, 2);
-    Serial.println(" ug/m3");
-  } else {
-    Serial.println("Failed to read valid data from SDS011.");
-  }
- /*
-  Serial.print("sensor_volt: ");
-  serial.print(data2.sensor_volt);
-  Serial.print(", RS_gas: ");
-  serial.print(data.RS_gas);
-  Serial.print(", ratio: ");
-  serial.print(data.ratio);
-  */
+  if(Serial.available() > 0) {
+    String cmd = Serial.readString();
+    AirQualityData data1 = readSDS011();
+    MQ9 data2 = readMq9();
+    AllData result;
+    //alert = digitalRead(DO);
   
-  if(data.isValid) {
+    /*
+    if (data.isValid) {
+      Serial.print("PM2.5: ");
+      Serial.print(data.pm2_5, 2);
+      Serial.print(" ug/m3  ");
+      Serial.print("PM10: ");
+      Serial.print(data.pm10, 2);
+      Serial.println(" ug/m3");
+    } else {
+      Serial.println("Failed to read valid data from SDS011.");
+    }
+   /*
+    Serial.print("sensor_volt: ");
+    serial.print(data2.sensor_volt);
+    Serial.print(", RS_gas: ");
+    serial.print(data.RS_gas);
+    Serial.print(", ratio: ");
+    serial.print(data.ratio);
+    */
+      /*
+    Serial.println("---Data1---");
+    Serial.print("pm2.5: ");
+    Serial.println(result.data1.pm2_5);
+    Serial.print("pm10: ");
+    Serial.println(result.data1.pm10);
+    Serial.print("isValid: ");
+    Serial.println(result.data1.isValid);
+    Serial.print("\n\n");
+    Serial.println("---Data2---");
+    Serial.print("sensor volt: ");
+    Serial.println(result.data2.sensor_volt);
+    Serial.print("RS_gas: ");
+    Serial.println(result.data2.RS_gas);
+    Serial.print("Ratio: ");
+    Serial.println(result.data2.ratio);
+    Serial.print("\n\n");
+    */
     
-  } else {
-    
+    //(RES struct /n)
+    if(data1.isValid) {
+      result.data1 = data1;
+      //Serial.write((byte*)&data, sizeof(data));
+    } else {
+      result.data1 = {0,0,false}; 
+    }
+  
+    result.data2 = data2;
+  
+    Serial.print("RES ");
+    Serial.write((byte*)&result, sizeof(result));
+    Serial.print(" \n");
+  
+  
+    /*if(alert==1) digitalWrite(LED, HIGH);
+    else if(alert == 0) digitalWrite(LED, lOW);*/
   }
-
-
-  if(alert==1) digitalWrite(LED, HIGH);
-  else if(alert == 0) digitalWrite(LED, lOW);
   
   delay(1000);
 }
