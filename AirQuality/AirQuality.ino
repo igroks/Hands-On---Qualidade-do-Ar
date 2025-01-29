@@ -49,10 +49,10 @@ AirQualityData readSDS011() {
     if (buffer[9] == 0xAB) {
       int pm25int = (buffer[3] << 8) | buffer[2];
       int pm10int = (buffer[5] << 8) | buffer[4];
-      //data.pm2_5 = pm25int / 10.0;
-      //data.pm10 = pm10int / 10.0;
-      data.pm2_5 = pm25int;
-      data.pm10 = pm10int;
+      data.pm2_5 = pm25int / 10.0;
+      data.pm10 = pm10int / 10.0;
+      //data.pm2_5 = pm25int;
+      //data.pm10 = pm10int;
       data.isValid = true;
     }
   }
@@ -64,16 +64,18 @@ void writeToSerial(const byte* command, size_t length) {
   sds.write(command, length);
 }
 
+//função para ler os dados do MQ9
 MQ9 readMq9() {
   MQ9 data = {0, 0, 0};
-  int sensorValue = analogRead(AO);
-  float volt;
-  float gas;
+  int sensorValue = analogRead(AO);  
+  float volt;  
+  float gas;   //
   float ratio;
-  volt = ((float)sensorValue/1024) * 5.0;
-  gas = (5.0 - volt) / volt; 
+  volt = ((float)sensorValue/1024) * 5.0; //voltagem lida do sensor
+  gas = (5.0 - volt) / volt;              //resistencia do sensor 
   ratio = gas / R0;
 
+  //multiplicar por 100 quando mandar
   data.sensor_volt = volt * 100;
   data.RS_gas = gas * 100;
   data.ratio = ratio * 100; 
@@ -104,44 +106,29 @@ void loop() {
     AllData result;
     //alert = digitalRead(DO);
   
-    /*
-    if (data.isValid) {
+    if (data1.isValid) {
+      Serial.println("\n\n");
+      Serial.println("---Data1---");
       Serial.print("PM2.5: ");
-      Serial.print(data.pm2_5, 2);
+      Serial.print(data1.pm2_5, 2);
       Serial.print(" ug/m3  ");
       Serial.print("PM10: ");
-      Serial.print(data.pm10, 2);
+      Serial.print(data1.pm10, 2);
       Serial.println(" ug/m3");
+      Serial.println("\n\n");
     } else {
       Serial.println("Failed to read valid data from SDS011.");
     }
-   /*
-    Serial.print("sensor_volt: ");
-    serial.print(data2.sensor_volt);
-    Serial.print(", RS_gas: ");
-    serial.print(data.RS_gas);
-    Serial.print(", ratio: ");
-    serial.print(data.ratio);
-    */
-      /*
-    Serial.println("---Data1---");
-    Serial.print("pm2.5: ");
-    Serial.println(result.data1.pm2_5);
-    Serial.print("pm10: ");
-    Serial.println(result.data1.pm10);
-    Serial.print("isValid: ");
-    Serial.println(result.data1.isValid);
-    Serial.print("\n\n");
+
     Serial.println("---Data2---");
-    Serial.print("sensor volt: ");
-    Serial.println(result.data2.sensor_volt);
-    Serial.print("RS_gas: ");
-    Serial.println(result.data2.RS_gas);
-    Serial.print("Ratio: ");
-    Serial.println(result.data2.ratio);
-    Serial.print("\n\n");
-    */
-    
+    Serial.print("sensor_volt: ");
+    Serial.print(data2.sensor_volt);
+    Serial.print(", RS_gas: ");
+    Serial.print(data2.RS_gas);
+    Serial.print(", ratio: ");
+    Serial.print(data2.ratio);
+
+    /*
     //(RES struct /n)
     if(data1.isValid) {
       result.data1 = data1;
@@ -155,7 +142,7 @@ void loop() {
     Serial.print("RES ");
     Serial.write((byte*)&result, sizeof(result));
     Serial.print(" \n");
-  
+    */
   
     /*if(alert==1) digitalWrite(LED, HIGH);
     else if(alert == 0) digitalWrite(LED, lOW);*/
