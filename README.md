@@ -36,6 +36,12 @@ Bem-vindo ao repositório da Equipe 05 no DevTITANS!
 
 ## Uso
 
+### Protótipo
+
+* Conectar o SDS011 aos pinos 16 (RX), 17 (TX), ao Vin e GND, e o MQ9 aos pinos 26 (Digital), 32 (Analógico), VIn e GND;
+* Carregar o código dentro da pasta MQ9preheating no esp32 e esperar 48 horas para a calibração da resistencia da carga. Salvar o valor normalizado para adicionar no elemento R0 do código de AirQuality.ino;
+* Carregar o código da pasta AirQuality usando o valor R0 para captar os valores de qualidade do ar do ambiente. 
+
 {Instruções para reproduzir as alterações no AOSP}
 
 ## Contato
