@@ -21,6 +21,7 @@ struct MQ9 {
   int sensor_volt;
   int RS_gas;
   int ratio; 
+  int gasCon;
 };
 
 struct AllData {
@@ -49,10 +50,10 @@ AirQualityData readSDS011() {
     if (buffer[9] == 0xAB) {
       int pm25int = (buffer[3] << 8) | buffer[2];
       int pm10int = (buffer[5] << 8) | buffer[4];
-      data.pm2_5 = pm25int / 10.0;
-      data.pm10 = pm10int / 10.0;
-      //data.pm2_5 = pm25int;
-      //data.pm10 = pm10int;
+      //data.pm2_5 = pm25int / 10.0;
+      //data.pm10 = pm10int / 10.0;
+      data.pm2_5 = pm25int;
+      data.pm10 = pm10int;
       data.isValid = true;
     }
   }
@@ -65,23 +66,37 @@ void writeToSerial(const byte* command, size_t length) {
 }
 
 //função para ler os dados do MQ9
-MQ9 readMq9() {
-  MQ9 data = {0, 0, 0};
-  int sensorValue = analogRead(AO);  
-  float volt;  
-  float gas;   //
-  float ratio;
-  volt = ((float)sensorValue/1024) * 5.0; //voltagem lida do sensor
-  gas = (5.0 - volt) / volt;              //resistencia do sensor 
-  ratio = gas / R0;
+// Estrutura para armazenar os dados do sensor MQ9
+struct MQ9 {
+  float sensor_volt;  // Tensão do sensor (em Volts)
+  float RS_gas;       // Resistência do sensor (em ohms)
+  float ratio;        // Razão (RS / R0)
+};
 
-  //multiplicar por 100 quando mandar
+MQ9 readMq9() {
+  MQ9 data = {0, 0, 0};  // Inicializa a estrutura com zeros
+
+  // Lê o valor analógico do sensor (valor entre 0 e 1023)
+  int sensorValue = analogRead(AO);  
+  
+  // Converte o valor analógico para tensão (em Volts)
+  float volt = ((float)sensorValue / 1023.0) * 5.0;
+  
+  // Calcula a resistência do sensor (RS)
+  float gas = (5.0 - volt) / volt;
+  
+  // Calcula a razão entre a resistência do sensor e o valor de calibração (R0)
+  float ratio = gas / R0;
+
+  // Atribui os valores calculados à estrutura de dados
   data.sensor_volt = volt * 100;
   data.RS_gas = gas * 100;
-  data.ratio = ratio * 100; 
+  data.ratio = ratio * 100;
+  data.gasCon = 2.3 * (ratio)^2.5 
 
-  return data;
+  return data;  // Retorna a estrutura com os dados
 }
+
 
 void setup() {
   // Inicializa a comunicação Serial com o computador
@@ -105,7 +120,7 @@ void loop() {
     MQ9 data2 = readMq9();
     AllData result;
     //alert = digitalRead(DO);
-  
+
     if (data1.isValid) {
       Serial.println("\n\n");
       Serial.println("---Data1---");
@@ -143,7 +158,6 @@ void loop() {
     Serial.write((byte*)&result, sizeof(result));
     Serial.print(" \n");
     */
-  
     /*if(alert==1) digitalWrite(LED, HIGH);
     else if(alert == 0) digitalWrite(LED, lOW);*/
   }
