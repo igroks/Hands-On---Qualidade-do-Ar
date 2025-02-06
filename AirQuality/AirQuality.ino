@@ -12,16 +12,16 @@ HardwareSerial sds(2); // Use Serial1 para o SDS011 (no ESP32, Serial1 é custom
 
 // Estrutura para armazenar os valores do sensor
 struct AirQualityData {
-  int pm2_5;
-  int pm10;
+  float pm2_5;
+  float pm10;
   bool isValid; // Indica se os dados são válidos
 };
 
 struct MQ9 {
-  int sensor_volt;
-  int RS_gas;
-  int ratio; 
-  int gasCon;
+  float sensor_volt;  // Tensão do sensor (em Volts)
+  float RS_gas;       // Resistência do sensor (em ohms)
+  float ratio;        // Razão (RS / R0)
+  float gasCon;
 };
 
 struct AllData {
@@ -34,7 +34,7 @@ float R0 = 0.91;
 
 // Função para ler os dados da serial
 AirQualityData readSDS011() {
-  AirQualityData data = {0, 0, false};
+  AirQualityData data1 = {0, 0, false};
   
   // Aguarda o byte inicial 0xAA
   while (sds.available() && sds.read() != 0xAA) { }
@@ -50,14 +50,14 @@ AirQualityData readSDS011() {
     if (buffer[9] == 0xAB) {
       int pm25int = (buffer[3] << 8) | buffer[2];
       int pm10int = (buffer[5] << 8) | buffer[4];
-      //data.pm2_5 = pm25int / 10.0;
-      //data.pm10 = pm10int / 10.0;
-      data.pm2_5 = pm25int;
-      data.pm10 = pm10int;
-      data.isValid = true;
+      data1.pm2_5 = pm25int / 10.0;
+      data1.pm10 = pm10int / 10.0;
+      //data.pm2_5 = pm25int;
+      //data.pm10 = pm10int;
+      data1.isValid = true;
     }
   }
-  return data;
+  return data1;
 }
 
 // Função para enviar comandos ao SDS011
@@ -67,14 +67,9 @@ void writeToSerial(const byte* command, size_t length) {
 
 //função para ler os dados do MQ9
 // Estrutura para armazenar os dados do sensor MQ9
-struct MQ9 {
-  float sensor_volt;  // Tensão do sensor (em Volts)
-  float RS_gas;       // Resistência do sensor (em ohms)
-  float ratio;        // Razão (RS / R0)
-};
 
 MQ9 readMq9() {
-  MQ9 data = {0, 0, 0};  // Inicializa a estrutura com zeros
+  MQ9 data = {0, 0, 0, 0};  // Inicializa a estrutura com zeros
 
   // Lê o valor analógico do sensor (valor entre 0 e 1023)
   int sensorValue = analogRead(AO);  
@@ -92,7 +87,7 @@ MQ9 readMq9() {
   data.sensor_volt = volt * 100;
   data.RS_gas = gas * 100;
   data.ratio = ratio * 100;
-  data.gasCon = 2.3 * (ratio)^2.5 
+  data.gasCon = 2.3 * pow(ratio, 2.5);
 
   return data;  // Retorna a estrutura com os dados
 }
@@ -113,16 +108,15 @@ void setup() {
 }
 
 void loop() {
-
+  
   if(Serial.available() > 0) {
     String cmd = Serial.readString();
     AirQualityData data1 = readSDS011();
     MQ9 data2 = readMq9();
     AllData result;
     //alert = digitalRead(DO);
-
+    /*
     if (data1.isValid) {
-      Serial.println("\n\n");
       Serial.println("---Data1---");
       Serial.print("PM2.5: ");
       Serial.print(data1.pm2_5, 2);
@@ -130,11 +124,10 @@ void loop() {
       Serial.print("PM10: ");
       Serial.print(data1.pm10, 2);
       Serial.println(" ug/m3");
-      Serial.println("\n\n");
+      Serial.println("\n");
     } else {
       Serial.println("Failed to read valid data from SDS011.");
     }
-
     Serial.println("---Data2---");
     Serial.print("sensor_volt: ");
     Serial.print(data2.sensor_volt);
@@ -142,8 +135,10 @@ void loop() {
     Serial.print(data2.RS_gas);
     Serial.print(", ratio: ");
     Serial.print(data2.ratio);
-
-    /*
+    Serial.print(", Gas Concetration: ");
+    Serial.print(data2.gasCon);
+    Serial.println("\n\n");
+    */
     //(RES struct /n)
     if(data1.isValid) {
       result.data1 = data1;
@@ -157,7 +152,6 @@ void loop() {
     Serial.print("RES ");
     Serial.write((byte*)&result, sizeof(result));
     Serial.print(" \n");
-    */
     /*if(alert==1) digitalWrite(LED, HIGH);
     else if(alert == 0) digitalWrite(LED, lOW);*/
   }
