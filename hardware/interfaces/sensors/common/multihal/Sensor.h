@@ -98,9 +98,24 @@ class ContinuousSensor : public Sensor {
     ContinuousSensor(int32_t sensorHandle, ISensorsEventCallback* callback);
 };
 
-class AirQualitySensor : public OnChangeSensor {
+class Sds011Sensor : public OnChangeSensor {
     public:
-        AirQualitySensor(int32_t sensorHandle, ISensorsEventCallback* callback);
+        Sds011Sensor(int32_t sensorHandle, ISensorsEventCallback* callback);
+
+    protected:
+        std::vector<Event> readEvents() override;
+
+    protected:
+        float sensorRead = 0;
+
+    static int64_t timevalToNano(timeval const& t) {
+        return t.tv_sec*1000000000LL + t.tv_usec*1000;
+    }
+};
+
+class Mq9Sensor : public OnChangeSensor {
+    public:
+        Mq9Sensor(int32_t sensorHandle, ISensorsEventCallback* callback);
 
     protected:
         std::vector<Event> readEvents() override;

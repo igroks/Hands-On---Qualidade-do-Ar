@@ -227,9 +227,9 @@ ContinuousSensor::ContinuousSensor(int32_t sensorHandle, ISensorsEventCallback* 
     mSensorInfo.flags |= SensorFlagBits::CONTINUOUS_MODE;
 }
 
-AirQualitySensor::AirQualitySensor(int32_t sensorHandle, ISensorsEventCallback* callback)
+Sds011Sensor::Sds011Sensor(int32_t sensorHandle, ISensorsEventCallback* callback)
   : OnChangeSensor(sensorHandle, callback), mInputReader((size_t)(4)) {
-    mSensorInfo.name = "Air Quality Sensor";
+    mSensorInfo.name = "Sds011 Sensor";
     mSensorInfo.vendor = "devtitans";
     mSensorInfo.type = SensorType::DEVICE_PRIVATE_BASE;
     mSensorInfo.typeAsString = SENSOR_STRING_TYPE_DEVICE_PRIVATE_BASE;
@@ -240,7 +240,41 @@ AirQualitySensor::AirQualitySensor(int32_t sensorHandle, ISensorsEventCallback* 
 }
 
 
-std::vector AirQualitySensor::readEvents() {
+std::vector Sds011Sensor::readEvents() {
+    std::ifstream in("/sys/kernel/airquality/sensor"); // open sysfs file to read sensor read
+
+    std::vector<Event> events;
+
+    Event event_s;
+    event_s.timestamp = ::android::elapsedRealtimeNano();
+    event_s.sensorHandle = mSensorInfo.sensorHandle;
+    event_s.sensorType = mSensorInfo.type;
+
+    if (in) {
+        in >> sensorRead; 
+        in.close();
+    } 
+
+    event_s.u.scalar = sensorRead;
+    events.push_back(event_s);
+
+    return events;
+}
+
+Mq9Sensor::Mq9Sensor(int32_t sensorHandle, ISensorsEventCallback* callback)
+  : OnChangeSensor(sensorHandle, callback), mInputReader((size_t)(4)) {
+    mSensorInfo.name = "Mq9 Sensor";
+    mSensorInfo.vendor = "devtitans";
+    mSensorInfo.type = SensorType::DEVICE_PRIVATE_BASE;
+    mSensorInfo.typeAsString = SENSOR_STRING_TYPE_DEVICE_PRIVATE_BASE;
+    mSensorInfo.maxRange = 43000.0f;
+    mSensorInfo.resolution = 10.0f;
+    mSensorInfo.power = 0.001f;         // mA
+    mSensorInfo.minDelay = 200 * 1000;  // microseconds
+}
+
+
+std::vector Mq9Sensor::readEvents() {
     std::ifstream in("/sys/kernel/airquality/sensor"); // open sysfs file to read sensor read
 
     std::vector<Event> events;
