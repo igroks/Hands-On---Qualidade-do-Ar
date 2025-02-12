@@ -1,12 +1,12 @@
-#pragma once                           // Inclui esse cabeçalho apenas uma vez
+#pragma once                           // Include this header only once
 
-#include <fstream>                     // Classe ifstream
-#include <sys/stat.h>                  // Função e struct stat
+#include <fstream>                     // ifstream class
+#include <sys/stat.h>                  // stat function and struct
 #include <ctime>                       // Import the ctime library
 
-using namespace std;                   // Permite usar string diretamente ao invés de std::string
+using namespace std;                   // Allows using string directly instead of std::string
 
-namespace devtitans::airquality {       // Pacote Smartlamp
+namespace devtitans::airquality {       // airquality namespace
 
     typedef struct Sds011 {
         int pm2_5;
@@ -15,8 +15,8 @@ namespace devtitans::airquality {       // Pacote Smartlamp
     } Sds011;
 
     typedef struct Mq9 {
-        int sensor_volt;
-        int RS_gas;
+        int sensorVolt;
+        int rsGas;
         int ratio;
     } Mq9;
 
@@ -25,36 +25,78 @@ namespace devtitans::airquality {       // Pacote Smartlamp
         Mq9 mq9;
     } AirQualityData;
 
-class AirQuality {    
+class AirQuality {
+    protected:
+        AirQuality();
+        static AirQuality* airqualityInstance;
+
     public:
         /**
-         * Verifica se o diretório /sys/kernel/airquality/sensor existe. Se existir
-         * o dispositivo AirQuality está conectado via USB.
-         *
-         * Retorna:
-         *      0: dispositivo não encontrado
-         *      1: sucesso
+         * Singletons should not be cloneable.
+         */
+        AirQuality(AirQuality &other) = delete;
+
+        /**
+         * Singletons should not be assignable.
+         */
+        void operator=(const AirQuality &) = delete;
+
+        /**
+         * This static method controls access to the singleton instance.
+         * On the first call, it creates a singleton object and stores it
+         * in the static field. On subsequent calls, it returns the existing
+         * object stored in the static field.
+         */
+        static AirQuality *GetInstance();
+        
+        /**
+         * Checks if the directory dirPath exists. If it exists,
+         * the device is connected via USB.
+         * 
+         * Returns:
+         *      0: device not found
+         *      1: success
          */
         int connect();
 
         /**
-         * Acessa dados recentes do sensor SDS 011.
+         * Accesses data from the SDS011 sensor.
+         *
+         * Returned values:
+         *     int pm2_5;
+         *     int pm10;
+         *     bool isValid;
          */
         Sds011 getSds011();
 
-         /**
-         * Acessa dados recentes do sensor MQ9.
+        /**
+         * Accesses data from the MQ9 sensor.
+         *
+         * Returned values:
+         *     int sensor_volt;
+         *     int RS_gas;
+         *     int ratio;
          */
         Mq9 getMq9();
 
     private:
+        /**
+         * Reads data from the file and updates the cache variable.
+         */ 
         void readFileValue();
+
+        /**
+         * Checks if the difference between the current reading timestamp and
+         * the timestamp of the last reading is greater than the timestamp_delta.
+         * If true, calls the readFileValue method to perform a new reading and
+         * update the cache variable.
+         */ 
         void validateCache();
 
-        AirQualityData sensor_data;
-        time_t timestamp_last_update;
-        int timestamp_delta = 5;                                     // Tempo minimo em segundos que deve existir entre as leituras para atualizar a cache
-        char dirPath[] = "/sys/kernel/airquality/sensor";
+        AirQualityData sensorData;                                   // Attribute that stores the last reading data
+        time_t timestampLastUpdate;                                  // Timestamp of the last reading
+        int timestampDelta = 5;                                      // Minimum time in seconds that must pass between readings to update the cache
+        char dirPath[] = "/sys/kernel/airquality/sensor";            // File where the driver writes the sensor data
 };
 
 } // namespace
