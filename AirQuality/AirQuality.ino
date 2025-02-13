@@ -6,22 +6,23 @@
 #define LED 34 // Led de alerta
 #define DO 26 // Digital
 #define AO 32 // Analógico
+#define RL 10.0 // Resistor da Carga
 
 
 HardwareSerial sds(2); // Use Serial1 para o SDS011 (no ESP32, Serial1 é customizável)
 
 // Estrutura para armazenar os valores do sensor
 struct AirQualityData {
-  float pm2_5;
-  float pm10;
+  int pm2_5;
+  int pm10;
   bool isValid; // Indica se os dados são válidos
 };
 
 struct MQ9 {
-  float sensor_volt;  // Tensão do sensor (em Volts)
-  float RS_gas;       // Resistência do sensor (em ohms)
-  float ratio;        // Razão (RS / R0)
-  float gasCon;
+  int sensor_volt;  // Tensão do sensor (em Volts)
+  int RS_gas;       // Resistência do sensor (em ohms)
+  int ratio;        // Razão (RS / R0)
+  int gasCon;
 };
 
 struct AllData {
@@ -30,7 +31,7 @@ struct AllData {
 };
 
 int alert = 0;
-float R0 = 0.91;
+float R0 = 9.6;
 
 // Função para ler os dados da serial
 AirQualityData readSDS011() {
@@ -50,10 +51,8 @@ AirQualityData readSDS011() {
     if (buffer[9] == 0xAB) {
       int pm25int = (buffer[3] << 8) | buffer[2];
       int pm10int = (buffer[5] << 8) | buffer[4];
-      data1.pm2_5 = pm25int / 10.0;
-      data1.pm10 = pm10int / 10.0;
-      //data.pm2_5 = pm25int;
-      //data.pm10 = pm10int;
+      data1.pm2_5 = conversor(pm25int / 10.0);
+      data1.pm10 = conversor(pm10int / 10.0);
       data1.isValid = true;
     }
   }
@@ -75,24 +74,26 @@ MQ9 readMq9() {
   int sensorValue = analogRead(AO);  
   
   // Converte o valor analógico para tensão (em Volts)
-  float volt = ((float)sensorValue / 1023.0) * 5.0;
+  float volt = ((float)sensorValue / 4095.0) * 3.3;
   
   // Calcula a resistência do sensor (RS)
-  float gas = (5.0 - volt) / volt;
+  float gas = ((3.3 * RL)/volt) - RL;
   
   // Calcula a razão entre a resistência do sensor e o valor de calibração (R0)
   float ratio = gas / R0;
 
   // Atribui os valores calculados à estrutura de dados
-  data.sensor_volt = volt * 100;
-  data.RS_gas = gas * 100;
-  data.ratio = ratio * 100;
-  data.gasCon = 2.3 * pow(ratio, 2.5);
+  data.sensor_volt = conversor(volt);
+  data.RS_gas = conversor(gas);
+  data.ratio = conversor(ratio);
+  data.gasCon = conversor(200 * pow(ratio, -1.50));
 
   return data;  // Retorna a estrutura com os dados
 }
 
-
+int conversor(float value) {
+  return (int)(round(value * 100));
+}
 void setup() {
   // Inicializa a comunicação Serial com o computador
   Serial.begin(9600);
@@ -115,14 +116,14 @@ void loop() {
     MQ9 data2 = readMq9();
     AllData result;
     //alert = digitalRead(DO);
-    /*
+    ///*
     if (data1.isValid) {
       Serial.println("---Data1---");
       Serial.print("PM2.5: ");
-      Serial.print(data1.pm2_5, 2);
+      Serial.print(data1.pm2_5);
       Serial.print(" ug/m3  ");
       Serial.print("PM10: ");
-      Serial.print(data1.pm10, 2);
+      Serial.print(data1.pm10);
       Serial.println(" ug/m3");
       Serial.println("\n");
     } else {
@@ -138,7 +139,8 @@ void loop() {
     Serial.print(", Gas Concetration: ");
     Serial.print(data2.gasCon);
     Serial.println("\n\n");
-    */
+    //*/
+    /*
     //(RES struct /n)
     if(data1.isValid) {
       result.data1 = data1;
@@ -152,6 +154,7 @@ void loop() {
     Serial.print("RES ");
     Serial.write((byte*)&result, sizeof(result));
     Serial.print(" \n");
+    */
     /*if(alert==1) digitalWrite(LED, HIGH);
     else if(alert == 0) digitalWrite(LED, lOW);*/
   }
