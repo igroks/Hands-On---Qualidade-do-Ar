@@ -29,6 +29,8 @@
 
 #include <iostream>
 
+#include "air_quality_lib.h"
+
 namespace android {
 namespace hardware {
 namespace sensors {
@@ -241,7 +243,8 @@ Sds011Sensor::Sds011Sensor(int32_t sensorHandle, ISensorsEventCallback* callback
 
 
 std::vector Sds011Sensor::readEvents() {
-    std::ifstream in("/sys/kernel/airquality/sensor"); // open sysfs file to read sensor read
+    AirQuality* airQualityLib = AirQuality::GetInstance();
+    Sds011 sds011Data = airQualityLib->getSds011();
 
     std::vector<Event> events;
 
@@ -250,12 +253,7 @@ std::vector Sds011Sensor::readEvents() {
     event_s.sensorHandle = mSensorInfo.sensorHandle;
     event_s.sensorType = mSensorInfo.type;
 
-    if (in) {
-        in >> sensorRead; 
-        in.close();
-    } 
-
-    event_s.u.scalar = sensorRead;
+    event_s.u.scalar = sds011Data;
     events.push_back(event_s);
 
     return events;
@@ -275,7 +273,8 @@ Mq9Sensor::Mq9Sensor(int32_t sensorHandle, ISensorsEventCallback* callback)
 
 
 std::vector Mq9Sensor::readEvents() {
-    std::ifstream in("/sys/kernel/airquality/sensor"); // open sysfs file to read sensor read
+    AirQuality* airQualityLib = AirQuality::GetInstance();
+    Mq9 mq9Data = airQualityLib->getMq9();
 
     std::vector<Event> events;
 
@@ -284,12 +283,7 @@ std::vector Mq9Sensor::readEvents() {
     event_s.sensorHandle = mSensorInfo.sensorHandle;
     event_s.sensorType = mSensorInfo.type;
 
-    if (in) {
-        in >> sensorRead; 
-        in.close();
-    } 
-
-    event_s.u.scalar = sensorRead;
+    event_s.u.scalar = mq9Data;
     events.push_back(event_s);
 
     return events;
