@@ -242,7 +242,7 @@ Sds011Sensor::Sds011Sensor(int32_t sensorHandle, ISensorsEventCallback* callback
 }
 
 
-std::vector Sds011Sensor::readEvents() {
+std::vector<Event> Sds011Sensor::readEvents() {
     AirQuality* airQualityLib = AirQuality::GetInstance();
     Sds011 sds011Data = airQualityLib->getSds011();
 
@@ -272,7 +272,7 @@ Mq9Sensor::Mq9Sensor(int32_t sensorHandle, ISensorsEventCallback* callback)
 }
 
 
-std::vector Mq9Sensor::readEvents() {
+std::vector<Event> Mq9Sensor::readEvents() {
     AirQuality* airQualityLib = AirQuality::GetInstance();
     Mq9 mq9Data = airQualityLib->getMq9();
 
