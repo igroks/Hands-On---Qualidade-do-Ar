@@ -99,7 +99,7 @@ class AirQuality {
         AirQualityData sensorData;                                   // Attribute that stores the last reading data
         time_t timestampLastUpdate;                                  // Timestamp of the last reading
         int timestampDelta = 5;                                      // Minimum time in seconds that must pass between readings to update the cache
-        char dirPath[] = "/sys/kernel/airquality/sensor";            // File where the driver writes the sensor data
+        const char dirPath[] = "/sys/kernel/airquality/sensor";            // File where the driver writes the sensor data
 };
 
 } // namespace
