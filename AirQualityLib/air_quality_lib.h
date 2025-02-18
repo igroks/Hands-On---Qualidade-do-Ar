@@ -63,21 +63,24 @@ class AirQuality {
          * Accesses data from the SDS011 sensor.
          *
          * Returned values:
-         *     int pm2_5;
-         *     int pm10;
-         *     bool isValid;
+         * [
+         *     int pm2_5,
+         *     int pm10,
+         * ]
          */
-        Sds011 getSds011();
+        vector<int> getSds011();
 
         /**
          * Accesses data from the MQ9 sensor.
          *
          * Returned values:
-         *     int sensor_volt;
-         *     int RS_gas;
-         *     int ratio;
+         * [
+         *     int sensor_volt,
+         *     int RS_gas,
+         *     int ratio,
+         * ]
          */
-        Mq9 getMq9();
+        vector<int> getMq9();
 
     private:
         /**

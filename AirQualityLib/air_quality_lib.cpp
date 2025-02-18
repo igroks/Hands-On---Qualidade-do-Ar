@@ -61,14 +61,25 @@ void AirQuality::validateCache() {
     }
 }
 
-Sds011 AirQuality::getSds011() {
+vector<int> AirQuality::getSds011() {
+    vector<int> vetor;
+
     this->validateCache();  // Ensure cache is validated before returning the data
-    return this->sensorData.sds011;
+    vetor.push_back(this->sensorData.sds011.pm2_5);
+    vetor.push_back(this->sensorData.sds011.pm10);
+
+    return vetor;
 }
 
-Mq9 AirQuality::getMq9() {
+vector<int> AirQuality::getMq9() {
+    vector<int> vetor;
+
     this->validateCache();  // Ensure cache is validated before returning the data
-    return this->sensorData.mq9;
+    vetor.push_back(this->sensorData.mq9.sensorVolt);
+    vetor.push_back(this->sensorData.mq9.rsGas);
+    vetor.push_back(this->sensorData.mq9.ratio);
+
+    return vetor;
 }
 
 } // namespace devtitans::airquality
