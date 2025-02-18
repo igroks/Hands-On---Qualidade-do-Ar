@@ -29,8 +29,6 @@
 
 #include <iostream>
 
-#include "air_quality_lib.h"
-
 namespace android {
 namespace hardware {
 namespace sensors {

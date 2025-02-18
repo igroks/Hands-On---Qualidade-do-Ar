@@ -24,6 +24,8 @@
 #include <thread>
 #include <vector>
 
+#include "air_quality_lib.h"
+
 using ::android::hardware::sensors::V1_0::OperationMode;
 using ::android::hardware::sensors::V1_0::Result;
 using ::android::hardware::sensors::V2_1::Event;
