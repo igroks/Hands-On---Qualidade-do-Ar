@@ -42,11 +42,11 @@ void AirQuality::readFileValue() {
             time(&this->timestampLastUpdate);            // Update the timestamp of the last read
         } else {
             // Log or handle error if file cannot be opened
-            cerr << "Error: Unable to open the sensor data file at " << this->dirPath << endl;
+            std::cerr << "Error: Unable to open the sensor data file at " << this->dirPath << endl;
         }
     } else {
         // Log or handle error if device is not connected
-        cerr << "Error: Sensor device not connected." << endl;
+        std::cerr << "Error: Sensor device not connected." << endl;
     }
 }
 

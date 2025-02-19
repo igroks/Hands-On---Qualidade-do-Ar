@@ -31,6 +31,7 @@ using ::android::hardware::sensors::V1_0::Result;
 using ::android::hardware::sensors::V2_1::Event;
 using ::android::hardware::sensors::V2_1::SensorInfo;
 using ::android::hardware::sensors::V2_1::SensorType;
+using ::devtitans::airquality::AirQuality;
 
 namespace android {
 namespace hardware {

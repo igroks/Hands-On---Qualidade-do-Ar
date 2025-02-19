@@ -228,11 +228,11 @@ ContinuousSensor::ContinuousSensor(int32_t sensorHandle, ISensorsEventCallback* 
 }
 
 Sds011Sensor::Sds011Sensor(int32_t sensorHandle, ISensorsEventCallback* callback)
-  : OnChangeSensor(sensorHandle, callback), mInputReader((size_t)(4)) {
+  : OnChangeSensor(sensorHandle, callback) {
     mSensorInfo.name = "Sds011 Sensor";
     mSensorInfo.vendor = "devtitans";
     mSensorInfo.type = SensorType::DEVICE_PRIVATE_BASE;
-    mSensorInfo.typeAsString = SENSOR_STRING_TYPE_DEVICE_PRIVATE_BASE;
+    mSensorInfo.typeAsString = "SENSOR_STRING_TYPE_DEVICE_PRIVATE_BASE";
     mSensorInfo.maxRange = 43000.0f;
     mSensorInfo.resolution = 10.0f;
     mSensorInfo.power = 0.001f;         // mA
@@ -261,11 +261,11 @@ std::vector<Event> Sds011Sensor::readEvents() {
 }
 
 Mq9Sensor::Mq9Sensor(int32_t sensorHandle, ISensorsEventCallback* callback)
-  : OnChangeSensor(sensorHandle, callback), mInputReader((size_t)(4)) {
+  : OnChangeSensor(sensorHandle, callback) {
     mSensorInfo.name = "Mq9 Sensor";
     mSensorInfo.vendor = "devtitans";
     mSensorInfo.type = SensorType::DEVICE_PRIVATE_BASE;
-    mSensorInfo.typeAsString = SENSOR_STRING_TYPE_DEVICE_PRIVATE_BASE;
+    mSensorInfo.typeAsString = "SENSOR_STRING_TYPE_DEVICE_PRIVATE_BASE";
     mSensorInfo.maxRange = 43000.0f;
     mSensorInfo.resolution = 10.0f;
     mSensorInfo.power = 0.001f;         // mA

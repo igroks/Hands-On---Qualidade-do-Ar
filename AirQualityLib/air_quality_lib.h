@@ -3,6 +3,7 @@
 #include <fstream>                     // ifstream class
 #include <sys/stat.h>                  // stat function and struct
 #include <ctime>                       // Import the ctime library
+#include <iostream>
 
 using namespace std;                   // Allows using string directly instead of std::string
 
@@ -99,7 +100,7 @@ class AirQuality {
         AirQualityData sensorData;                                   // Attribute that stores the last reading data
         time_t timestampLastUpdate;                                  // Timestamp of the last reading
         int timestampDelta = 5;                                      // Minimum time in seconds that must pass between readings to update the cache
-        string dirPath = "/sys/kernel/airquality/sensor";            // File where the driver writes the sensor data
+        const char* dirPath = "/sys/kernel/airquality/sensor";            // File where the driver writes the sensor data
 };
 
 } // namespace
