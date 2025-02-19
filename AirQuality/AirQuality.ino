@@ -6,6 +6,7 @@
 #define LED 34 // Led de alerta
 #define DO 26 // Digital
 #define AO 32 // Analógico
+#define RL 10.0 // Resistor da Carga
 
 
 HardwareSerial sds(2); // Use Serial1 para o SDS011 (no ESP32, Serial1 é customizável)
@@ -30,7 +31,7 @@ struct AllData {
 };
 
 int alert = 0;
-float R0 = 0.91;
+float R0 = 9.6;
 
 // Função para ler os dados da serial
 AirQualityData readSDS011() {
@@ -73,10 +74,10 @@ MQ9 readMq9() {
   int sensorValue = analogRead(AO);  
   
   // Converte o valor analógico para tensão (em Volts)
-  float volt = ((float)sensorValue / 1023.0) * 5.0;
+  float volt = ((float)sensorValue / 4095.0) * 3.3;
   
   // Calcula a resistência do sensor (RS)
-  float gas = (5.0 - volt) / volt;
+  float gas = ((3.3 * RL)/volt) - RL;
   
   // Calcula a razão entre a resistência do sensor e o valor de calibração (R0)
   float ratio = gas / R0;
@@ -85,7 +86,7 @@ MQ9 readMq9() {
   data.sensor_volt = conversor(volt);
   data.RS_gas = conversor(gas);
   data.ratio = conversor(ratio);
-  data.gasCon = conversor(2.3 * pow(ratio, 2.5));
+  data.gasCon = conversor(200 * pow(ratio, -1.50));
 
   return data;  // Retorna a estrutura com os dados
 }
@@ -137,6 +138,7 @@ void loop() {
     Serial.print(data2.ratio);
     Serial.print(", Gas Concetration: ");
     Serial.print(data2.gasCon);
+    Serial.print(" ppm.");
     Serial.println("\n\n");
     */
     ///*
