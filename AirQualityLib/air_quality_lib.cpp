@@ -37,16 +37,16 @@ void AirQuality::readFileValue() {
         ifstream file(this->dirPath);                     // Open the file from the kernel module
 
         if (file.is_open()) {                             // Check if the file opened successfully
-            file >> this->sensorData;                    // Read data into the sensor data
+            file >> this->sensorData;                     // Read data into the sensor data
             file.close();
             time(&this->timestampLastUpdate);            // Update the timestamp of the last read
         } else {
             // Log or handle error if file cannot be opened
-            std::cerr << "Error: Unable to open the sensor data file at " << this->dirPath << endl;
+            cerr << "Error: Unable to open the sensor data file at " << this->dirPath << endl;
         }
     } else {
         // Log or handle error if device is not connected
-        std::cerr << "Error: Sensor device not connected." << endl;
+        cerr << "Error: Sensor device not connected." << endl;
     }
 }
 

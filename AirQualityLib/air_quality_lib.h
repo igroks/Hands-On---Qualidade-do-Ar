@@ -4,6 +4,7 @@
 #include <sys/stat.h>                  // stat function and struct
 #include <ctime>                       // Import the ctime library
 #include <iostream>
+#include <vector>
 
 using namespace std;                   // Allows using string directly instead of std::string
 
@@ -13,17 +14,32 @@ namespace devtitans::airquality {       // airquality namespace
         int pm2_5;
         int pm10;
         bool isValid;
+
+        friend std::ifstream& operator>>(std::ifstream& file, Sds011& data) {
+            file >> data.pm2_5 >> data.pm10 >> data.isValid;
+            return file;
+        }
     } Sds011;
 
     typedef struct Mq9 {
         int sensorVolt;
         int rsGas;
         int ratio;
+
+        friend std::ifstream& operator>>(std::ifstream& file, Mq9& data) {
+            file >> data.sensorVolt >> data.rsGas >> data.ratio;
+            return file;
+        }
     } Mq9;
 
     typedef struct AirQualityData {
         Sds011 sds011;
         Mq9 mq9;
+
+        friend std::ifstream& operator>>(std::ifstream& file, AirQualityData& data) {
+            file >> data.sds011 >> data.mq9;
+            return file;
+        }
     } AirQualityData;
 
 class AirQuality {
