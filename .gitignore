@@ -2,12 +2,20 @@
 
 # Ignorar arquivos do diretório .idea (configurações do Android Studio)
 AirQualityApp/.idea/
-
+AirQualityApp2/.idea/
 # Ignorar arquivos de build do Gradle
 AirQualityApp/app/build/
 AirQualityApp/build/
+AirQualityApp2/app/build/
+AirQualityApp2/build/
 
 # Ignorar arquivos específicos (se quiser ignorar apenas alguns do .idea)
 AirQualityApp/.idea/gradle.xml
 AirQualityApp/.idea/misc.xml
 AirQualityApp/.idea/vcs.xml
+
+AirQualityApp2/.idea/gradle.xml
+AirQualityApp2/.idea/misc.xml
+AirQualityApp2/.idea/vcs.xml
+
+
