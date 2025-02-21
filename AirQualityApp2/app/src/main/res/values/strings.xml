@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">AirQualityApp</string>
     <string name="home">Home</string>
+    <string name="splash_screen">Splash Screen</string>
 </resources>

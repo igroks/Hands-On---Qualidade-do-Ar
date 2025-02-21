@@ -6,17 +6,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/light_blue"
     android:gravity="center"
-    tools:context=".Home">
+    android:background="@color/light_blue"
+    tools:context=".SplashScreen">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/home"
-        android:textSize="30sp"
-        android:textColor="@color/black"
-        android:textStyle="bold"
-        />
+        android:text="@string/splash_screen"
+        android:textColor="@color/white"
+        android:textSize="30sp"/>
 
 </LinearLayout>
