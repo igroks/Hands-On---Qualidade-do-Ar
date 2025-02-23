@@ -1,0 +1,105 @@
+#include "air_quality_lib.h"
+
+using namespace std;                                   // Allows using string, ifstream directly instead of std::string
+
+namespace devtitans::airquality {                       // Inside the devtitans::airquality namespace
+
+AirQuality* AirQuality::airqualityInstance = nullptr;
+
+AirQuality::AirQuality() {
+    this->readFileValue();
+}
+
+AirQuality *AirQuality::GetInstance() {
+    /**
+     * This is a safer way to create an instance. 
+     * Using new directly can be dangerous if two threads try to create the instance at the same time.
+     */
+    if(airqualityInstance == nullptr){
+        airqualityInstance = new AirQuality();
+    }
+    return airqualityInstance;
+}
+
+int AirQuality::connect() {
+    struct stat dirStat;
+    if (stat(this->dirPath, &dirStat) == 0) {
+        if (S_ISDIR(dirStat.st_mode))
+            return 1;                                  // If the directory exists, return 1
+    }
+    return 0;                                           // Device not found
+}
+
+void AirQuality::readFileValue() {
+    int connected = this->connect();
+    string ans;
+    int pm2_5, pm10, isValid, sensorVolt, rsGas, ratio, gasCon;
+
+    if (connected == 1) {                                 // Device is connected, let's read the value
+        ifstream file(this->dirPath);                     // Open the file from the kernel module
+
+        if (file.is_open()) {   
+            //getline(file, ans);                          // Check if the file opened successfully
+            // file >> ans;                                  // Read data into the sensor data
+	        //sscanf(ans.c_str(), "%d %d %d %d %d %d %d", &pm2_5, &pm10, &isValid, &sensorVolt, &rsGas, &ratio, &gasCon);
+            
+            //this->sensorData.sds011.pm2_5 = pm2_5;
+            this->sensorData.sds011.pm2_5 = 5;
+            //this->sensorData.sds011.pm10 = pm10;
+            this->sensorData.sds011.pm10 = 1;
+            //this->sensorData.sds011.isValid = isValid;
+            this->sensorData.sds011.isValid = 6;
+            //this->sensorData.mq9.sensorVolt = sensorVolt;
+            this->sensorData.mq9.sensorVolt = 10;
+            //this->sensorData.mq9.rsGas = rsGas;
+            this->sensorData.mq9.rsGas = 7;
+            //this->sensorData.mq9.ratio = ratio;
+            this->sensorData.mq9.ratio = 10;
+            //this->sensorData.mq9.gasCon = gasCon;
+            this->sensorData.mq9.gasCon = 7;
+
+            file.close();
+            time(&this->timestampLastUpdate);            // Update the timestamp of the last read
+        } else {
+            // Log or handle error if file cannot be opened
+            cerr << "Error: Unable to open the sensor data file at " << this->dirPath << endl;
+        }
+    } else {
+        // Log or handle error if device is not connected
+        cerr << "Error: Sensor device not connected." << endl;
+    }
+}
+
+void AirQuality::validateCache() {
+    time_t timestampNow;
+    time(&timestampNow);
+
+    int diff = difftime(timestampNow, this->timestampLastUpdate);  // Difference in seconds
+
+    if (diff > this->timestampDelta) {  // If the cache is outdated, read the values again
+        this->readFileValue();
+    }
+}
+
+vector<int> AirQuality::getSds011() {
+    vector<int> vetor;
+
+    this->validateCache();  // Ensure cache is validated before returning the data
+    vetor.push_back(this->sensorData.sds011.pm2_5);
+    vetor.push_back(this->sensorData.sds011.pm10);
+
+    return vetor;
+}
+
+vector<int> AirQuality::getMq9() {
+    vector<int> vetor;
+
+    this->validateCache();  // Ensure cache is validated before returning the data
+    vetor.push_back(this->sensorData.mq9.sensorVolt);
+    vetor.push_back(this->sensorData.mq9.rsGas);
+    vetor.push_back(this->sensorData.mq9.ratio);
+
+    return vetor;
+}
+
+} // namespace devtitans::airquality
