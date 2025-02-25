@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -38,7 +39,7 @@ import androidx.compose.ui.unit.dp
 import com.example.airqualityapp.ui.theme.AirQualityAppTheme
 
 @Composable
-fun SensorCard(title: String, value: String, sensorName: String, expanded: Boolean = false, modifier: Modifier = Modifier) {
+fun SensorCard(title: String, value: String, sensorName: String, expanded: Boolean = false, extraInfo: List<String> = emptyList(), modifier: Modifier = Modifier) {
     var isExpanded by remember { mutableStateOf(expanded) } // Estado de expansão do card
 
     Card(
@@ -85,7 +86,7 @@ fun SensorCard(title: String, value: String, sensorName: String, expanded: Boole
                 Icon(
                     imageVector = Icons.Filled.Info,
                     contentDescription = "Alerta",
-                    tint = Color.Red,
+                    tint = Color.Yellow ,
                 )
             }
             Text(
@@ -100,13 +101,19 @@ fun SensorCard(title: String, value: String, sensorName: String, expanded: Boole
             // Texto + Seta para expandir/contrair
             // Informações adicionais
             if (isExpanded) {
+                HorizontalDivider(
+                    modifier = Modifier.padding(top = 8.dp),
+                    thickness = 1.dp,
+                    color = Color.White
+                )
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 8.dp)
                 ) {
-                    Text("Informações adicionais sobre o sensor.", style = MaterialTheme.typography.bodySmall.copy(color = Color.White))
-                    Text("Mais dados técnicos do sensor podem ser exibidos aqui.", style = MaterialTheme.typography.bodySmall.copy(color = Color.White))
+                    extraInfo.forEach{
+                        Text(it, style = MaterialTheme.typography.bodySmall.copy(color = Color.White))
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(4.dp))
@@ -160,7 +167,7 @@ fun ValueInputCardExpandedPreview() {
                 .background(Color.Black)
                 .padding(16.dp)
         ) {
-            SensorCard("Sensor 1", "Valor 1", "Sensor 1", true)
+            SensorCard("Sensor 1", "Valor 1", "Sensor 1", true, listOf("Informações adicionais sobre o sensor.", "Mais dados técnicos do sensor podem ser exibidos aqui."))
         }
     }
 }

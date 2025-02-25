@@ -16,23 +16,27 @@ import com.example.airqualityapp.utils.AirQualitySummary
 import com.example.airqualityapp.utils.SensorCard
 import com.example.airqualityapp.utils.SensorCardDualValues
 import com.example.airqualityapp.utils.getBackgroundGradient
+import com.example.airqualityapp.utils.validateDataSensors
 import java.time.LocalTime
 
 data class DHT11(
-    val temperature: Float,
-    val humidity: Float,
-    val priority: Int
+    val temperature: Float = 0.0f,
+    val humidity: Float = 0.0f,
 )
 
 data class SDS011(
-    val pm25: Float,
-    val pm10: Float,
-    val priority: Int
+    val pm25: Float = 0.0f,
+    val pm10: Float = 0.0f,
 )
 
 data class MQ9(
-    val carbonMonoxide: Float,
-    val priority: Int
+    val carbonMonoxide: Float = 0.0f,
+)
+
+data class Sensors(
+    val dht11: DHT11,
+    val sds011: SDS011,
+    val mq9: MQ9,
 )
 
 @Composable
@@ -44,16 +48,11 @@ fun HomeScreen(currentTime: LocalTime = LocalTime.now()) {
             .padding(0.dp)
     ) {
         // Instâncias dos sensores com valores em Float
-        val dht11 = DHT11(temperature = 25.0f, humidity = 60.0f, priority = 1)
-        val sds011 = SDS011(pm25 = 35.0f, pm10 = 50.0f, priority = 1)
-        val mq9 = MQ9(carbonMonoxide = 9.0f, priority = 3)
-
-        // Lista genérica com sensores e prioridades
-        val sensorList = listOf(
-            Triple("DHT11", dht11.priority, dht11),
-            Triple("SDS011", sds011.priority, sds011),
-            Triple("MQ9", mq9.priority, mq9)
-        ).sortedBy { it.second } // Ordena pela prioridade
+        val dht11 = DHT11(temperature = 25.0f, humidity = 60.0f)
+        val sds011 = SDS011(pm25 = 35.0f, pm10 = 50.0f)
+        val mq9 = MQ9(carbonMonoxide = 9.0f)
+        val dataSensors = Sensors(dht11, sds011, mq9)
+        val validatedData = validateDataSensors(dataSensors).sortedBy { it.priority }
 
         LazyColumn(
             modifier = Modifier
@@ -65,8 +64,8 @@ fun HomeScreen(currentTime: LocalTime = LocalTime.now()) {
                 AirQualitySummary(city = "São Paulo", state = "SP", pm25 = sds011.pm25, pm10 = sds011.pm10)
             }
 
-            items(sensorList) { (_, _, sensor) ->
-                when (sensor) {
+            items(validatedData) {sensorData ->
+                when (val sensor = sensorData.sensor) {
                     is DHT11 -> {
                         SensorCardDualValues(
                             sensorName = "DHT11",
@@ -75,7 +74,8 @@ fun HomeScreen(currentTime: LocalTime = LocalTime.now()) {
                             value1Unit = "°C",
                             value2Title = "Umidade",
                             value2 = sensor.humidity,
-                            value2Unit = "%"
+                            value2Unit = "%",
+                            extraInfo = sensorData.extraInfo
                         )
                     }
 
@@ -87,12 +87,17 @@ fun HomeScreen(currentTime: LocalTime = LocalTime.now()) {
                             value1Unit = "µg/m³",
                             value2Title = "PM10",
                             value2 = sensor.pm10,
-                            value2Unit = "µg/m³"
+                            value2Unit = "µg/m³",
+                            extraInfo = sensorData.extraInfo
                         )
                     }
 
                     is MQ9 -> {
-                        SensorCard("Monóxido de Carbono", "${sensor.carbonMonoxide} ppm", "MQ9")
+                        SensorCard(
+                            "Monóxido de Carbono",
+                            "${sensor.carbonMonoxide} ppm",
+                            "MQ9",
+                            extraInfo = sensorData.extraInfo)
                     }
                 }
             }

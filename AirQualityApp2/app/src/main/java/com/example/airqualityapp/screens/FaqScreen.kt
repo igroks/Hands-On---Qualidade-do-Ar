@@ -7,7 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +33,7 @@ val questions = listOf(
 
 @Composable
 fun FaqScreen () {
+    val listState = rememberLazyListState()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -39,6 +41,7 @@ fun FaqScreen () {
             .padding(0.dp)
     ) {
         LazyColumn(
+            state = listState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(0.dp),
@@ -60,8 +63,8 @@ fun FaqScreen () {
                 )}
             }
 
-            items(questions) { (question, answer) ->
-                InfoCard(question = question, answer = answer)
+            itemsIndexed(questions) {index, (question, answer) ->
+                InfoCard(question = question, answer = answer, index = index + 1, listState = listState)
             }
             item {
                 Box(modifier = Modifier.padding(top = 20.dp))

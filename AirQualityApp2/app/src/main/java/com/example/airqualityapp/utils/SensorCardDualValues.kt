@@ -50,6 +50,7 @@ fun SensorCardDualValues(
     value2: Float,
     value2Unit: String,
     expanded: Boolean = false,
+    extraInfo: List<String> = emptyList(),
     modifier: Modifier = Modifier
 ) {
     var isExpanded by remember { mutableStateOf(expanded) } // Estado de expansão do card
@@ -100,7 +101,7 @@ fun SensorCardDualValues(
                 Icon(
                     imageVector = Icons.Filled.Info,
                     contentDescription = "Alerta",
-                    tint = Color.Red,
+                    tint = Color.Yellow,
                 )
             }
 
@@ -150,8 +151,9 @@ fun SensorCardDualValues(
                         .padding(top = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text("Informações adicionais sobre o sensor.", style = MaterialTheme.typography.bodySmall.copy(color = Color.White))
-                    Text("Dados técnicos e históricos podem ser exibidos aqui.", style = MaterialTheme.typography.bodySmall.copy(color = Color.White))
+                    extraInfo.forEach{
+                        Text(it, style = MaterialTheme.typography.bodySmall.copy(color = Color.White))
+                    }
                 }
             }
             // Texto + Seta para expandir/contrair (centralizado corretamente)
@@ -207,7 +209,7 @@ fun ValueInputDualCardExpandedPreview() {
                 .background(Color.Black)
                 .padding(16.dp)
         ) {
-            SensorCardDualValues("SDS011", "PM2.5", 999.9f, "µg/m³", "PM10", 999.9f, "µg/m³", true)
+            SensorCardDualValues("SDS011", "PM2.5", 999.9f, "µg/m³", "PM10", 999.9f, "µg/m³", true, listOf("Valores técnicos"))
         }
     }
 }
