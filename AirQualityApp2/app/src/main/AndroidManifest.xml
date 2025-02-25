@@ -13,6 +13,27 @@
         android:theme="@style/Theme.AirQualityApp"
         tools:targetApi="31">
         <activity
+            android:name=".utils.InfoCard"
+            android:exported="false" />
+        <activity
+            android:name=".screens.FaqScreen"
+            android:exported="false" />
+        <activity
+            android:name=".utils.SensorCardDualValues"
+            android:exported="false" />
+        <activity
+            android:name=".utils.AirQualitySummary"
+            android:exported="false" />
+        <activity
+            android:name=".utils.SensorCard"
+            android:exported="false" />
+        <activity
+            android:name=".utils.BackgroundUtils"
+            android:exported="false" />
+        <activity
+            android:name=".MapScreen"
+            android:exported="false" />
+        <activity
             android:name=".HomeScreen"
             android:exported="false" />
         <activity
