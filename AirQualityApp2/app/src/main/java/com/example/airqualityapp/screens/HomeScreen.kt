@@ -3,12 +3,12 @@ package com.example.airqualityapp.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.airqualityapp.ui.theme.AirQualityAppTheme
@@ -16,6 +16,7 @@ import com.example.airqualityapp.utils.AirQualitySummary
 import com.example.airqualityapp.utils.SensorCard
 import com.example.airqualityapp.utils.SensorCardDualValues
 import com.example.airqualityapp.utils.getBackgroundGradient
+import java.time.LocalTime
 
 data class DHT11(
     val temperature: Float,
@@ -35,12 +36,12 @@ data class MQ9(
 )
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(currentTime: LocalTime = LocalTime.now()) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(getBackgroundGradient())
-            .padding(4.dp)
+            .background(getBackgroundGradient(currentTime))
+            .padding(0.dp)
     ) {
         // Instâncias dos sensores com valores em Float
         val dht11 = DHT11(temperature = 25.0f, humidity = 60.0f, priority = 1)
@@ -54,22 +55,25 @@ fun HomeScreen() {
             Triple("MQ9", mq9.priority, mq9)
         ).sortedBy { it.second } // Ordena pela prioridade
 
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            AirQualitySummary(city = "São Paulo", state = "SP", pm25 = sds011.pm25, pm10 = sds011.pm10)
-            sensorList.forEach { (name, _, sensor) ->
+            item {
+                AirQualitySummary(city = "São Paulo", state = "SP", pm25 = sds011.pm25, pm10 = sds011.pm10)
+            }
+
+            items(sensorList) { (_, _, sensor) ->
                 when (sensor) {
                     is DHT11 -> {
                         SensorCardDualValues(
-                            sensorName = name,
+                            sensorName = "DHT11",
                             value1Title = "Temperatura",
                             value1 = sensor.temperature,
                             value1Unit = "°C",
-                            value2Title = "Humidade",
+                            value2Title = "Umidade",
                             value2 = sensor.humidity,
                             value2Unit = "%"
                         )
@@ -77,7 +81,7 @@ fun HomeScreen() {
 
                     is SDS011 -> {
                         SensorCardDualValues(
-                            sensorName = name,
+                            sensorName = "SDS011",
                             value1Title = "PM2.5",
                             value1 = sensor.pm25,
                             value1Unit = "µg/m³",
@@ -88,18 +92,54 @@ fun HomeScreen() {
                     }
 
                     is MQ9 -> {
-                        SensorCard("Monóxido de Carbono", "${sensor.carbonMonoxide} ppm", name)
+                        SensorCard("Monóxido de Carbono", "${sensor.carbonMonoxide} ppm", "MQ9")
                     }
                 }
+            }
+            item {
+                Box(modifier = Modifier.padding(top = 20.dp))
             }
         }
     }
 }
 
+
 @Preview(showBackground = true)
 @Composable
-fun ValueInputScreenPreview() {
+fun ValueInputScreenPreview1() {
     AirQualityAppTheme {
-        HomeScreen()
+        HomeScreen(LocalTime.of(8, 0))
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ValueInputScreenPreview2() {
+    AirQualityAppTheme {
+        HomeScreen(LocalTime.of(16, 0))
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ValueInputScreenPreview3() {
+    AirQualityAppTheme {
+        HomeScreen(LocalTime.of(19, 0))
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ValueInputScreenPreview4() {
+    AirQualityAppTheme {
+        HomeScreen(LocalTime.of(0, 0))
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ValueInputScreenPreview5() {
+    AirQualityAppTheme {
+        HomeScreen(LocalTime.of(7, 0))
     }
 }

@@ -3,9 +3,11 @@ package com.example.airqualityapp.screens
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,26 +36,35 @@ fun FaqScreen () {
         modifier = Modifier
             .fillMaxSize()
             .background(getBackgroundGradient())
-            .padding(16.dp)
+            .padding(0.dp)
     ) {
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(brush = getBackgroundGradient())
-                .padding(16.dp),
+                .padding(0.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                text = "Dúvidas Frequentes",
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = Color.White,
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(bottom = 20.dp)
-            )
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth() // Preenche a largura disponível
+                        .padding(top = 36.dp)
+                ){
+                Text(
+                    text = "Dúvidas Frequentes",
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    color = Color.White,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(bottom = 20.dp)
+                )}
+            }
 
-            questions.forEach { (question, answer) ->
+            items(questions) { (question, answer) ->
                 InfoCard(question = question, answer = answer)
+            }
+            item {
+                Box(modifier = Modifier.padding(top = 20.dp))
             }
         }
     }

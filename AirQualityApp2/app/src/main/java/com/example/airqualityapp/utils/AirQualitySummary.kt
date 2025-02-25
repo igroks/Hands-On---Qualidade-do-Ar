@@ -58,7 +58,9 @@ fun AirQualitySummary(city: String, state: String, pm25: Float, pm10: Float) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp),
+            .padding(vertical = 16.dp)
+            .padding(top = 20.dp)
+        ,
         horizontalArrangement = Arrangement.Center
     ) {
         Column(

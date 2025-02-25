@@ -5,8 +5,10 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,10 +37,10 @@ import androidx.compose.ui.unit.dp
 import com.example.airqualityapp.ui.theme.AirQualityAppTheme
 
 @Composable
-fun InfoCard(question: String, answer: String) {
-    var expanded by remember { mutableStateOf(false) }
+fun InfoCard(question: String, answer: String, expanded: Boolean = false) {
+    var isExpanded by remember { mutableStateOf(expanded) }
 
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -48,9 +50,9 @@ fun InfoCard(question: String, answer: String) {
                     ambientColor = Color.Transparent,
                     spotColor = Color.Transparent
                 )
-                .clickable { expanded = !expanded },
+                .clickable { isExpanded = !isExpanded },
             colors = CardDefaults.cardColors(
-                containerColor = if (expanded) Color(0xAA424242) else Color(0x55424242)
+                containerColor = if (isExpanded) Color(0x55424242) else Color(0x43B3B3B3)
             ),
             shape = RoundedCornerShape(16.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp, focusedElevation = 2.dp),
@@ -70,7 +72,7 @@ fun InfoCard(question: String, answer: String) {
                 )
 
                 Icon(
-                    imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                    imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                     contentDescription = null,
                     tint = Color.White
                 )
@@ -78,7 +80,7 @@ fun InfoCard(question: String, answer: String) {
         }
 
         AnimatedVisibility(
-            visible = expanded,
+            visible = isExpanded,
             enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
             exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut()
         ) {
@@ -115,6 +117,28 @@ fun InfoCard(question: String, answer: String) {
 @Composable
 fun InfoCardPreview() {
     AirQualityAppTheme {
-        InfoCard(question = "O que é o AirQuality?", answer = "O AirQuality é um aplicativo que monitora e exibe informações sobre a qualidade do ar em tempo real.")
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.Black)
+                .padding(16.dp)
+        ){
+            InfoCard(question = "O que é o AirQuality?", answer = "O AirQuality é um aplicativo que monitora e exibe informações sobre a qualidade do ar em tempo real.")
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun InfoCardExpandedPreview() {
+    AirQualityAppTheme {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.Black)
+                .padding(16.dp)
+        ){
+            InfoCard(question = "O que é o AirQuality?", answer = "O AirQuality é um aplicativo que monitora e exibe informações sobre a qualidade do ar em tempo real.", true)
+        }
     }
 }

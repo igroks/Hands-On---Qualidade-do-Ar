@@ -1,5 +1,8 @@
 package com.example.airqualityapp.utils
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,8 +16,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,9 +49,10 @@ fun SensorCardDualValues(
     value2Title: String,
     value2: Float,
     value2Unit: String,
+    expanded: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    var isExpanded by remember { mutableStateOf(false) } // Estado de expansão do card
+    var isExpanded by remember { mutableStateOf(expanded) } // Estado de expansão do card
 
     Card(
         modifier = modifier
@@ -64,16 +74,35 @@ fun SensorCardDualValues(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(16.dp)
+                .animateContentSize(  // Anima a mudança de tamanho do conteúdo
+                    animationSpec = tween(
+                        durationMillis = 300,
+                        easing = FastOutSlowInEasing
+                    )
+                ),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(
-                text = "Sensor: $sensorName",
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White // Cor do texto alterada para branco
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Nome do sensor
+                Text(
+                    text = "Sensor: $sensorName",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White // Cor do texto alterada para branco
+                    )
                 )
-            )
+
+                // Ícone
+                Icon(
+                    imageVector = Icons.Filled.Info,
+                    contentDescription = "Alerta",
+                    tint = Color.Red,
+                )
+            }
 
             Row(
                 modifier = Modifier
@@ -108,20 +137,13 @@ fun SensorCardDualValues(
                 }
             }
 
-            // Texto + Seta para expandir/contrair (centralizado corretamente)
-            Text(
-                text = if (isExpanded) "Mostrar menos ▲" else "Mostrar mais ▼",
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 12.dp)
-                    .clickable { isExpanded = !isExpanded },
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    color = Color.White
-                )
-            )
-
             // Informações adicionais ao expandir
             if (isExpanded) {
+                HorizontalDivider(
+                    modifier = Modifier.padding(top = 8.dp),
+                    thickness = 1.dp,
+                    color = Color.White
+                )
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -131,6 +153,30 @@ fun SensorCardDualValues(
                     Text("Informações adicionais sobre o sensor.", style = MaterialTheme.typography.bodySmall.copy(color = Color.White))
                     Text("Dados técnicos e históricos podem ser exibidos aqui.", style = MaterialTheme.typography.bodySmall.copy(color = Color.White))
                 }
+            }
+            // Texto + Seta para expandir/contrair (centralizado corretamente)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+                ,
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Mostrar mais ",
+                    modifier = Modifier
+                        .clickable { isExpanded = !isExpanded }
+                    //.align(Alignment.CenterHorizontally),
+                    , style = MaterialTheme.typography.bodyMedium.copy(
+                        color = Color.White
+                    )
+                )
+                Icon(
+                    imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                    contentDescription = null,
+                    tint = Color.White
+                )
             }
         }
     }
@@ -146,7 +192,22 @@ fun ValueInputDualCardPreview() {
                 .background(Color.Black)
                 .padding(16.dp)
         ) {
-            SensorCardDualValues("Sensor 1", "Valor 1", 100.0f, "Km", "Valor 2", 999.0f, "Km")
+            SensorCardDualValues("SDS011", "PM2.5", 999.9f, "µg/m³", "PM10", 999.9f, "µg/m³")
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ValueInputDualCardExpandedPreview() {
+    AirQualityAppTheme {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.Black)
+                .padding(16.dp)
+        ) {
+            SensorCardDualValues("SDS011", "PM2.5", 999.9f, "µg/m³", "PM10", 999.9f, "µg/m³", true)
         }
     }
 }

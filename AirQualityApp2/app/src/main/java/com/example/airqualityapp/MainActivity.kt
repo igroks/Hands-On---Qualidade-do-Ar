@@ -26,6 +26,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.airqualityapp.screens.FaqScreen
 import com.example.airqualityapp.screens.HomeScreen
 import com.example.airqualityapp.screens.MapScreen
+import com.example.airqualityapp.screens.SplashScreen
 import com.example.airqualityapp.ui.theme.AirQualityAppTheme
 import com.example.airqualityapp.utils.getBackgroundGradient
 
@@ -33,19 +34,12 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("InflateParams")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // 1. Infla o layout XML da Splash
-        val splashView = layoutInflater.inflate(R.layout.activity_splash_screen, null)
-        setContentView(splashView)
-
-        // 2. Aguarda um tempo (ou carregamento de dados) e depois carrega o Compose
-        window.decorView.postDelayed({
-            setContent {
-                AirQualityAppTheme {
-                    AirQualityApp()
-                }
-
+        setContent {
+            AirQualityAppTheme {
+                AirQualityApp()
             }
-        }, 3000)
+
+        }
     }
 }
 
@@ -53,10 +47,10 @@ class MainActivity : ComponentActivity() {
 fun AirQualityApp() {
     val navController = rememberNavController()
     val tabs = listOf("Medidores", "Mapa", "Dúvidas")
-    val routes = listOf("home", "map", "faq")
+    val routes = listOf("home", "map", "faq", "Splash")
 
     // Estado para aba selecionada com base na rota atual
-    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route ?: "home"
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route ?: "splash"
     val selectedTabIndex = routes.indexOf(currentRoute).coerceAtLeast(0)
     val backgroundGradient = getBackgroundGradient()
     Scaffold(
@@ -67,7 +61,7 @@ fun AirQualityApp() {
                 selectedTabIndex = selectedTabIndex,
                 modifier = Modifier.fillMaxWidth().background(backgroundGradient),
                 containerColor = Color.Black.copy(alpha = 0.2f), // Transparente e acinzentado no fundo das abas
-                contentColor = Color.White, // Cor do texto e da indicação da aba
+                contentColor = Color.White,
                 indicator = {
                     tabPositions -> SecondaryIndicator(
                     modifier = Modifier
@@ -79,13 +73,13 @@ fun AirQualityApp() {
             ) {
                 tabs.forEachIndexed { index, title ->
                     Tab(
-                        text = { Text(title, color = Color.White) }, // Texto branco nas abas
+                        text = { Text(title, color = Color.White) },
                         selected = selectedTabIndex == index,
                         onClick = {
                             val targetRoute = routes[index]
                             if (currentRoute != targetRoute) {
                                 navController.navigate(targetRoute) {
-                                    popUpTo("home") { inclusive = false }
+                                    popUpTo("splash") { inclusive = false }
                                     launchSingleTop = true
                                 }
                             }
@@ -97,9 +91,10 @@ fun AirQualityApp() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "home",
+            startDestination = "splash",
             modifier = Modifier.padding(innerPadding)
         ) {
+            composable("splash") { SplashScreen(navController) }
             composable("home") { HomeScreen() }
             composable("map") { MapScreen() }
             composable("faq") { FaqScreen() }

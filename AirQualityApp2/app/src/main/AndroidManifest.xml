@@ -13,6 +13,9 @@
         android:theme="@style/Theme.AirQualityApp"
         tools:targetApi="31">
         <activity
+            android:name=".utils.PulsingIcon"
+            android:exported="false" />
+        <activity
             android:name=".utils.InfoCard"
             android:exported="false" />
         <activity
