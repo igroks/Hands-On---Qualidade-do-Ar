@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
 fun AirQualityApp() {
     val navController = rememberNavController()
     val tabs = listOf("Medidores", "Mapa", "Dúvidas")
-    val routes = listOf("home", "map", "faq", "splash")
+    val routes = listOf("splash", "home", "map", "faq")
 
     // Estado para aba selecionada com base na rota atual
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route ?: "splash"
@@ -81,7 +81,7 @@ fun AirQualityApp() {
                                 val targetRoute = routes[index]
                                 if (currentRoute != targetRoute) {
                                     navController.navigate(targetRoute) {
-                                        popUpTo("splash") { inclusive = false }
+                                        popUpTo("home") { inclusive = false }
                                         launchSingleTop = true
                                     }
                                 }
@@ -93,7 +93,7 @@ fun AirQualityApp() {
         ) { innerPadding ->
             NavHost(
                 navController = navController,
-                startDestination = "splash",
+                startDestination = "home",
                 modifier = Modifier.padding(innerPadding)
             ) {
                 composable("splash") { SplashScreen(navController) }

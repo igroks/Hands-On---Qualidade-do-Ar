@@ -1,4 +1,5 @@
 #include <HardwareSerial.h>
+#include "DHT.h"
 
 // SDS011 serial connection
 #define SDS_RX 16 // Ajuste para o pino RX correto da sua placa
@@ -7,12 +8,15 @@
 #define DO 26 // Digital
 #define AO 32 // Analógico
 #define RL 10.0 // Resistor da Carga
+#define DHTPIN 2 // Pino do DHT11
+#define DHTTYPE DHT11
 
 
 HardwareSerial sds(2); // Use Serial1 para o SDS011 (no ESP32, Serial1 é customizável)
+DHT dht(DHTPIN, DHTTYPE);
 
 // Estrutura para armazenar os valores do sensor
-struct AirQualityData {
+struct SDS011 {
   int pm2_5;
   int pm10;
   bool isValid; // Indica se os dados são válidos
@@ -25,17 +29,23 @@ struct MQ9 {
   int gasCon;
 };
 
+struct DHT11 {
+	int temperature
+	int humidity
+}
+
 struct AllData {
-  AirQualityData data1;
+  SDS011 data1;
   MQ9 data2;
+  DHT11 data3;
 };
 
 int alert = 0;
 float R0 = 9.6;
 
 // Função para ler os dados da serial
-AirQualityData readSDS011() {
-  AirQualityData data1 = {0, 0, false};
+SDS011 readSDS011() {
+  SDS011 data1 = {0, 0, false};
   
   // Aguarda o byte inicial 0xAA
   while (sds.available() && sds.read() != 0xAA) { }
@@ -101,6 +111,7 @@ void setup() {
   Serial.println("Initializing SDS011 Air Quality Monitor...");
   // Inicializa a comunicação HardwareSerial com o SDS011
   sds.begin(9600, SERIAL_8N1, SDS_RX, SDS_TX);
+  dht.begin();
   // Exemplo: enviar comando para colocar o sensor no modo de espera
   byte sleepCommand[] = {0xAA, 0xB4, 0x06, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x05, 0xAB};
   writeToSerial(sleepCommand, sizeof(sleepCommand));
@@ -112,10 +123,21 @@ void loop() {
   
   if(Serial.available() > 0) {
     String cmd = Serial.readString();
-    AirQualityData data1 = readSDS011();
+    SDS011 data1 = readSDS011();
     MQ9 data2 = readMq9();
+    DHT11 data3 = {0.0, 0.0}
     AllData result;
+
+    // Leitura da umidade
+  	float humidity = dht.readHumidity();
+  	data3.humidity = humidity;
+  
+  	// Leitura da temperatura em Celsius
+  	float temperature = dht.readTemperature(); 
+  	data3.temperature = temperature;
+
     //alert = digitalRead(DO);
+
     /*
     if (data1.isValid) {
       Serial.println("---Data1---");
@@ -151,6 +173,7 @@ void loop() {
     }
   
     result.data2 = data2;
+    result.data3 = data3;
   
     Serial.print("RES ");
     Serial.write((byte*)&result, sizeof(result));

@@ -41,7 +41,7 @@ fun SplashScreen(navController: NavHostController) {
         )
     }
     LaunchedEffect(Unit) {
-        delay(5000) // Aguarda 5 segundos antes de navegar para a Home
+        delay(3000) // Aguarda 5 segundos antes de navegar para a Home
         navController.navigate("home") {
             popUpTo("splash") { inclusive = true } // Remove a Splash da pilha de navegação
         }
