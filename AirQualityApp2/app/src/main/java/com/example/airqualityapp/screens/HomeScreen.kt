@@ -48,9 +48,9 @@ fun HomeScreen(currentTime: LocalTime = LocalTime.now()) {
             .padding(0.dp)
     ) {
         // Instâncias dos sensores com valores em Float
-        val dht11 = DHT11(temperature = 25.0f, humidity = 60.0f)
-        val sds011 = SDS011(pm25 = 35.0f, pm10 = 50.0f)
-        val mq9 = MQ9(carbonMonoxide = 9.0f)
+        val dht11 = DHT11(temperature = 30.0f, humidity = 30.0f)
+        val sds011 = SDS011(pm25 = 20.0f, pm10 = 70.0f)
+        val mq9 = MQ9(carbonMonoxide = 9f)
         val dataSensors = Sensors(dht11, sds011, mq9)
         val validatedData = validateDataSensors(dataSensors).sortedBy { it.priority }
 
@@ -61,7 +61,7 @@ fun HomeScreen(currentTime: LocalTime = LocalTime.now()) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
-                AirQualitySummary(city = "São Paulo", state = "SP", pm25 = sds011.pm25, pm10 = sds011.pm10)
+                AirQualitySummary(city = "São Paulo", state = "SP", pm25 = sds011.pm25, pm10 = sds011.pm10, co = mq9.carbonMonoxide)
             }
 
             items(validatedData) {sensorData ->
@@ -96,8 +96,7 @@ fun HomeScreen(currentTime: LocalTime = LocalTime.now()) {
                         SensorCard(
                             "Monóxido de Carbono",
                             "${sensor.carbonMonoxide} ppm",
-                            "MQ9",
-                            extraInfo = sensorData.extraInfo)
+                            "MQ9", extraInfo = sensorData.extraInfo)
                     }
                 }
             }

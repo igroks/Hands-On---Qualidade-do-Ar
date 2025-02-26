@@ -1,6 +1,7 @@
 package com.example.airqualityapp.utils
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,6 +9,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,22 +35,28 @@ data class QualityStatus(
 )
 
 @Composable
-fun airQualityStatus(averagePm: Float): QualityStatus {
+fun airQualityStatus(value: Int): QualityStatus {
     val (statusText, statusColor) = when {
-        averagePm <= 40 -> "Bom" to Color(0xFF4CAF50)
-        averagePm <= 80 -> "Moderada" to Color(0xFFFFEB3B)
-        averagePm <= 120 -> "Ruim" to Color(0xFFFF9800)
-        averagePm <= 200 -> "Muito Ruim" to Color(0xFFF44336)
-        else -> "Péssima" to Color(0xFF990066)
+        value <= 40 -> "Boa" to Color(0xFF4CAF50)
+        value <= 80 -> "Moderada" to Color(0xFFFFEB3B)
+        value <= 120 -> "Ruim" to Color(0xFFFF9800)
+        value <= 200 -> "Péssima" to Color(0xFFF44336)
+        else -> "Crítica" to Color(0xFF990066)
     }
     return QualityStatus(status = statusText, color = statusColor)
 }
 
 @Composable
-fun AirQualitySummary(city: String, state: String, pm25: Float, pm10: Float) {
+fun AirQualitySummary(
+    city: String,
+    state: String,
+    pm25: Float,
+    pm10: Float,
+    co: Float,
+) {
     val currentTime = remember { mutableStateOf(LocalTime.now()) }
-    val average = (pm25 + pm10) / 2
-    val airQualityStatus = airQualityStatus(average)
+    val iqa = calculateIQA(pm10, pm25, co)
+    val airQualityStatus = airQualityStatus(iqa)
 
     LaunchedEffect(Unit) {
         while (true) {
@@ -58,8 +68,8 @@ fun AirQualitySummary(city: String, state: String, pm25: Float, pm10: Float) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp)
-            .padding(top = 20.dp)
+            .padding(vertical = 0.dp)
+            .padding(top = 40.dp)
         ,
         horizontalArrangement = Arrangement.Center
     ) {
@@ -85,7 +95,7 @@ fun AirQualitySummary(city: String, state: String, pm25: Float, pm10: Float) {
                 )
             }
             Text(
-                text = "${"%.1f".format(average)} µg/m³",
+                text = "IQA: $iqa",
                 style = MaterialTheme.typography.headlineLarge.copy(color = Color.White)
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -107,6 +117,37 @@ fun AirQualitySummary(city: String, state: String, pm25: Float, pm10: Float) {
                     )
                 }
             }
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(2.dp).padding(top = 16.dp)
+                    .border(
+                        width = 2.dp, // Largura da borda
+                        color = airQualityStatus.color, // Cor sólida da borda (altere conforme necessário)
+                        shape = RoundedCornerShape(16.dp) // Mesma curvatura do Card
+                    )
+                    .shadow(
+                        elevation = 6.dp,
+                        shape = RoundedCornerShape(16.dp),
+                        ambientColor = Color.Transparent,
+                        spotColor = Color.Transparent
+                    )
+                ,
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp, focusedElevation = 2.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0x33212121) // Cor preta com transparência (80% opacidade)
+                )
+            ) {
+                Text(
+                    modifier = Modifier.padding(16.dp),
+                    text = "Uma descrição do IQA",
+                    style = MaterialTheme.typography.bodySmall
+                        .copy(
+                        color = Color.White // Cor do texto alterada para branco
+                    )
+                )
+            }
         }
     }
 }
@@ -121,7 +162,7 @@ fun ValueInputSummaryPreview() {
                 .background(Color.Black)
                 .padding(16.dp)
         ) {
-            AirQualitySummary("São Paulo", "SP", 100.0f, 200.0f)
+            AirQualitySummary("São Paulo", "SP", 15.0f, 40.0f, 9.0f)
         }
     }
 }

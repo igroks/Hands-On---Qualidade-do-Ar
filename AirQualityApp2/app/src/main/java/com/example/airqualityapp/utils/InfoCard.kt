@@ -34,6 +34,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,10 +50,12 @@ fun InfoCard(
     listState: LazyListState = rememberLazyListState()
 ) {
     var isExpanded by remember { mutableStateOf(expanded) }
+    val density = LocalDensity.current
+    val screenHeightPx = with(density) { LocalConfiguration.current.screenHeightDp.dp.toPx() }
 
     LaunchedEffect(isExpanded) {
         if (isExpanded) {
-            listState.animateScrollToItem(index, scrollOffset = 200)
+            listState.animateScrollToItem(index, (-screenHeightPx / 3).toInt())
         }
     }
 
@@ -96,8 +100,8 @@ fun InfoCard(
 
         AnimatedVisibility(
             visible = isExpanded,
-            enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
-            exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut()
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
         ) {
             Card(
                 modifier = Modifier
