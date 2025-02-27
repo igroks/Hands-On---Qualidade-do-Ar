@@ -227,9 +227,9 @@ ContinuousSensor::ContinuousSensor(int32_t sensorHandle, ISensorsEventCallback* 
     mSensorInfo.flags |= SensorFlagBits::CONTINUOUS_MODE;
 }
 
-Sds011Sensor::Sds011Sensor(int32_t sensorHandle, ISensorsEventCallback* callback)
+SDS011Sensor::SDS011Sensor(int32_t sensorHandle, ISensorsEventCallback* callback)
   : OnChangeSensor(sensorHandle, callback) {
-    mSensorInfo.name = "Sds011 Sensor";
+    mSensorInfo.name = "SDS011 Sensor";
     mSensorInfo.vendor = "devtitans";
     mSensorInfo.type = SensorType::DEVICE_PRIVATE_BASE;
     mSensorInfo.typeAsString = "SENSOR_STRING_TYPE_DEVICE_PRIVATE_BASE";
@@ -240,9 +240,9 @@ Sds011Sensor::Sds011Sensor(int32_t sensorHandle, ISensorsEventCallback* callback
 }
 
 
-std::vector<Event> Sds011Sensor::readEvents() {
+std::vector<Event> SDS011Sensor::readEvents() {
     AirQuality* airQualityLib = AirQuality::GetInstance();
-    std::vector<int> sds011Data = airQualityLib->getSds011();
+    std::vector<int> sds011Data = airQualityLib->getSDS011();
 
     std::vector<Event> events;
 
@@ -251,18 +251,18 @@ std::vector<Event> Sds011Sensor::readEvents() {
     event_s.sensorHandle = mSensorInfo.sensorHandle;
     event_s.sensorType = mSensorInfo.type;
 
-    event_s.u.vec3.x = 0;
-    event_s.u.vec3.y = sds011Data[0];
-    event_s.u.vec3.z = sds011Data[1];
-
+    event_s.u.vec3.x = sds011Data[0];
+    event_s.u.vec3.y = sds011Data[1];
+    event_s.u.vec3.z = 0;
+    event_s.u.vec3.status = SensorStatus::ACCURACY_HIGH;
     events.push_back(event_s);
 
     return events;
 }
 
-Mq9Sensor::Mq9Sensor(int32_t sensorHandle, ISensorsEventCallback* callback)
+MQ9Sensor::MQ9Sensor(int32_t sensorHandle, ISensorsEventCallback* callback)
   : OnChangeSensor(sensorHandle, callback) {
-    mSensorInfo.name = "Mq9 Sensor";
+    mSensorInfo.name = "MQ9 Sensor";
     mSensorInfo.vendor = "devtitans";
     mSensorInfo.type = SensorType::DEVICE_PRIVATE_BASE;
     mSensorInfo.typeAsString = "SENSOR_STRING_TYPE_DEVICE_PRIVATE_BASE";
@@ -273,9 +273,9 @@ Mq9Sensor::Mq9Sensor(int32_t sensorHandle, ISensorsEventCallback* callback)
 }
 
 
-std::vector<Event> Mq9Sensor::readEvents() {
+std::vector<Event> MQ9Sensor::readEvents() {
     AirQuality* airQualityLib = AirQuality::GetInstance();
-    std::vector<int> mq9Data = airQualityLib->getMq9();
+    std::vector<int> mq9Data = airQualityLib->getMQ9();
 
     std::vector<Event> events;
 
@@ -284,10 +284,43 @@ std::vector<Event> Mq9Sensor::readEvents() {
     event_s.sensorHandle = mSensorInfo.sensorHandle;
     event_s.sensorType = mSensorInfo.type;
 
-    event_s.u.vec3.x = mq9Data[0];
-    event_s.u.vec3.y = mq9Data[1];
-    event_s.u.vec3.z = mq9Data[2];
+    event_s.u.vec4.x = mq9Data[0];
+    event_s.u.vec4.y = mq9Data[1];
+    event_s.u.vec4.z = mq9Data[2];
+    event_s.u.vec4.w = mq9Data[3];
+    events.push_back(event_s);
 
+    return events;
+}
+
+DHT11Sensor::DHT11Sensor(int32_t sensorHandle, ISensorsEventCallback* callback)
+  : OnChangeSensor(sensorHandle, callback) {
+    mSensorInfo.name = "DHT11 Sensor";
+    mSensorInfo.vendor = "devtitans";
+    mSensorInfo.type = SensorType::DEVICE_PRIVATE_BASE;
+    mSensorInfo.typeAsString = "SENSOR_STRING_TYPE_DEVICE_PRIVATE_BASE";
+    mSensorInfo.maxRange = 43000.0f;
+    mSensorInfo.resolution = 10.0f;
+    mSensorInfo.power = 0.001f;         // mA
+    mSensorInfo.minDelay = 200 * 1000;  // microseconds
+}
+
+
+std::vector<Event> DHT11Sensor::readEvents() {
+    AirQuality* airQualityLib = AirQuality::GetInstance();
+    std::vector<int> dht11Data = airQualityLib->getDHT11();
+
+    std::vector<Event> events;
+
+    Event event_s;
+    event_s.timestamp = ::android::elapsedRealtimeNano();
+    event_s.sensorHandle = mSensorInfo.sensorHandle;
+    event_s.sensorType = mSensorInfo.type;
+
+    event_s.u.vec3.x = dht11Data[0];
+    event_s.u.vec3.y = dht11Data[1];
+    event_s.u.vec3.z = 0;
+    event_s.u.vec3.status = SensorStatus::ACCURACY_HIGH;
     events.push_back(event_s);
 
     return events;

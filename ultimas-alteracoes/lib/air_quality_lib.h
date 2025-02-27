@@ -6,43 +6,35 @@
 #include <iostream>
 #include <stdio.h>
 #include <vector>
+#include <log/log.h>                   // LogCat
+
 
 using namespace std;                   // Allows using string directly instead of std::string
 
 namespace devtitans::airquality {       // airquality namespace
 
-    typedef struct Sds011 {
-        int pm2_5;
-        int pm10;
-        bool isValid;
+typedef struct SDS011 {
+    int pm2_5;
+    int pm10;
+} SDS011;
 
-        //friend std::ifstream& operator>>(std::ifstream& file, Sds011& data) {
-        //    file >> data.pm2_5 >> data.pm10 >> data.isValid;
-        //    return file;
-        //}
-    } Sds011;
+typedef struct MQ9 {
+    int voltage;
+    int resistance;
+    int ratio;
+    int concentration;
+} MQ9;
 
-    typedef struct Mq9 {
-        int sensorVolt;
-        int rsGas;
-        int ratio;
-	int gasCon;
+typedef struct DHT11 {
+	int temperature;
+	int humidity;
+} DHT11;
 
-        // friend std::ifstream& operator>>(std::ifstream& file, Mq9& data) {
-        //    file >> data.sensorVolt >> data.rsGas >> data.ratio;
-        //    return file;
-        //}
-    } Mq9;
-
-    typedef struct AirQualityData {
-        Sds011 sds011;
-        Mq9 mq9;
-
-        //friend std::ifstream& operator>>(std::ifstream& file, AirQualityData& data) {
-        //    file >> data.sds011 >> data.mq9;
-        //    return file;
-        //}
-    } AirQualityData;
+typedef struct AirQualityData {
+    SDS011 sds011;
+    MQ9 mq9;
+    DHT11 dht11;
+} AirQualityData;
 
 class AirQuality {
     protected:
@@ -87,19 +79,31 @@ class AirQuality {
          *     int pm10,
          * ]
          */
-        vector<int> getSds011();
+        vector<int> getSDS011();
 
         /**
          * Accesses data from the MQ9 sensor.
          *
          * Returned values:
          * [
-         *     int sensor_volt,
-         *     int RS_gas,
+         *     int voltage,
+         *     int resistance,
          *     int ratio,
+         *     int concentration,
          * ]
          */
-        vector<int> getMq9();
+        vector<int> getMQ9();
+
+        /**
+         * Accesses data from the DHT11 sensor.
+         *
+         * Returned values:
+         * [
+         *     int temperature,
+         *     int humidity,
+         * ]
+         */
+        vector<int> getDHT11();
 
     private:
         /**
@@ -118,7 +122,8 @@ class AirQuality {
         AirQualityData sensorData;                                   // Attribute that stores the last reading data
         time_t timestampLastUpdate;                                  // Timestamp of the last reading
         int timestampDelta = 5;                                      // Minimum time in seconds that must pass between readings to update the cache
-        const char* dirPath = "/sys/kernel/airquality/sensor";            // File where the driver writes the sensor data
+        string dirPath = "/sys/kernel/airquality"; 
+        string fileName = "sensor";                             // File where the driver writes the sensor data
 };
 
 } // namespace
