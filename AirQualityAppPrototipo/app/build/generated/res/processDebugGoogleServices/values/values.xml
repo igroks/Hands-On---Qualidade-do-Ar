@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="gcm_defaultSenderId" translatable="false">311457623920</string>
-    <string name="google_api_key" translatable="false">AIzaSyDnwFeKg6EyFjoJG0_UqWCXXiOHVnEH6_Y</string>
-    <string name="google_app_id" translatable="false">1:311457623920:android:69f60a824b9ede6c8069b5</string>
-    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyDnwFeKg6EyFjoJG0_UqWCXXiOHVnEH6_Y</string>
-    <string name="google_storage_bucket" translatable="false">qualidade-do-ar-34127.firebasestorage.app</string>
-    <string name="project_id" translatable="false">qualidade-do-ar-34127</string>
-</resources>
