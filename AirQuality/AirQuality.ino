@@ -29,15 +29,15 @@ struct MQ9 {
   int gasCon;
 };
 
-struct DHT11 {
-	int temperature
-	int humidity
-}
+struct DHT11a {
+	int temperature;
+	int humidity;
+};
 
 struct AllData {
   SDS011 data1;
   MQ9 data2;
-  DHT11 data3;
+  DHT11a data3;
 };
 
 int alert = 0;
@@ -125,7 +125,7 @@ void loop() {
     String cmd = Serial.readString();
     SDS011 data1 = readSDS011();
     MQ9 data2 = readMq9();
-    DHT11 data3 = {0.0, 0.0}
+    DHT11a data3 = {0, 0};
     AllData result;
 
     // Leitura da umidade
@@ -162,6 +162,16 @@ void loop() {
     Serial.print(data2.gasCon);
     Serial.print(" ppm.");
     Serial.println("\n\n");
+
+    Serial.println("---Data3---");
+    Serial.print("Temperature: ");
+    Serial.print(data3.temperature);
+    Serial.print("C, ");
+    Serial.print("Umidade: ");
+    Serial.print(data3.humidity);
+    Serial.print("%.");
+    Serial.println("\n\n");
+    
     */
     ///*
     //(RES struct /n)
