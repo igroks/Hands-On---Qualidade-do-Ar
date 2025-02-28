@@ -38,44 +38,68 @@ import com.example.airqualityapp.ui.theme.AirQualityAppTheme
 import com.example.airqualityapp.utils.getBackgroundGradient
 import org.osmdroid.config.Configuration.getInstance
 
+data class DHT11(
+    var temperature: Float = 0.0f,
+    var humidity: Float = 0.0f
+)
+
+data class SDS011(
+    var pm25: Float = 0.0f,
+    var pm10: Float = 0.0f
+)
+
+data class MQ9(var carbonMonoxide: Float = 0.0f)
+
+data class Sensors(
+    val dht11: DHT11 = DHT11(),
+    val sds011: SDS011 = SDS011(),
+    val mq9: MQ9 = MQ9()
+)
 
 class MainActivity : ComponentActivity() {
+   private var sensors: Sensors = Sensors(DHT11(), SDS011(), MQ9())
     private lateinit var sensorManager: SensorManager
     @SuppressLint("InflateParams")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager;
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val sensorList = sensorManager.getSensorList(Sensor.TYPE_DEVICE_PRIVATE_BASE)
 
-        val sensor1 = sensorList[0]
-        sensorManager.registerListener(sds011listener, sensor1, SensorManager.SENSOR_DELAY_NORMAL)
-        val sensor2 = sensorList[1]
-        sensorManager.registerListener(mq9listener, sensor2, SensorManager.SENSOR_DELAY_NORMAL)
-        val sensor3 = sensorList[2]
-        sensorManager.registerListener(dht11listener, sensor3, SensorManager.SENSOR_DELAY_NORMAL)
+        if (sensorList.isNotEmpty()) {
 
-        getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
+            val sensor1 = sensorList[0]
+            val sensor2 = sensorList[1]
+            val sensor3 = sensorList[2]
+
+            sensorManager.registerListener(sds011listener, sensor1, SensorManager.SENSOR_DELAY_NORMAL)
+            sensorManager.registerListener(mq9listener, sensor2, SensorManager.SENSOR_DELAY_NORMAL)
+            sensorManager.registerListener(dht11listener, sensor3, SensorManager.SENSOR_DELAY_NORMAL)
+
+            Log.d("Sensors", "Sensor 1: ${sensor1.name}, Sensor 2: ${sensor2.name}, Sensor 3: ${sensor3.name}")
+            getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
+
+        }
 
         setContent {
             AirQualityAppTheme {
-                AirQualityApp()
+                AirQualityApp(sensors)
             }
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        sensorManager.unregisterListener(dht11listener)
         sensorManager.unregisterListener(sds011listener)
         sensorManager.unregisterListener(mq9listener)
-        sensorManager.unregisterListener(dht11listener)
     }
-
     private val sds011listener: SensorEventListener = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent) {
             // The value of the first subscript in the values array is the current light intensity
-            val value = event.values[0]
-            Log.d("SDS011", "Value: $value")
+            Log.d("SDS011", "PM2.5: ${event.values[0]}, PM10: ${event.values[1]}")
+            sensors.sds011.pm25 = event.values[0]
+            sensors.sds011.pm10 = event.values[1]
         }
 
         override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
@@ -85,7 +109,7 @@ class MainActivity : ComponentActivity() {
     private val mq9listener: SensorEventListener = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent) {
             // The value of the first subscript in the values array is the current light intensity
-            val value = event.values[0]
+            sensors.mq9.carbonMonoxide = event.values[2]
         }
 
         override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
@@ -95,17 +119,17 @@ class MainActivity : ComponentActivity() {
     private val dht11listener: SensorEventListener = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent) {
             // The value of the first subscript in the values array is the current light intensity
-            val value = event.values[0]
+            sensors.dht11.temperature = event.values[0]
+            sensors.dht11.humidity = event.values[1]
         }
 
         override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
         }
     }
-
 }
 
 @Composable
-fun AirQualityApp() {
+fun AirQualityApp(sensors: Sensors = Sensors(DHT11(), SDS011(), MQ9())) {
     val navController = rememberNavController()
     val tabs = listOf("Medidores", "Mapa", "Dúvidas")
     val routes = listOf("home", "map", "faq")
@@ -160,7 +184,7 @@ fun AirQualityApp() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable("splash") { SplashScreen(navController) }
-            composable("home") { HomeScreen() }
+            composable("home") { HomeScreen(sensors) }
             composable("map") { MapScreen("AirQualityMap") }
             composable("faq") { FaqScreen() }
         }

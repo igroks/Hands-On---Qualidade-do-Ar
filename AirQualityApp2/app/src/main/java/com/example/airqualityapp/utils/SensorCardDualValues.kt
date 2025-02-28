@@ -49,6 +49,7 @@ fun SensorCardDualValues(
     value2Title: String,
     value2: Float,
     value2Unit: String,
+    priority: Int = 5,
     expanded: Boolean = false,
     extraInfo: List<String> = emptyList(),
     modifier: Modifier = Modifier
@@ -98,11 +99,13 @@ fun SensorCardDualValues(
                 )
 
                 // Ícone
-                Icon(
-                    imageVector = Icons.Filled.Info,
-                    contentDescription = "Alerta",
-                    tint = Color.Yellow,
-                )
+                if(priority < 5) {
+                    Icon(
+                        imageVector = Icons.Filled.Info,
+                        contentDescription = "Alerta",
+                        tint = Color.Yellow
+                    )
+                }
             }
 
             Row(
@@ -117,7 +120,7 @@ fun SensorCardDualValues(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(text = value1Title, style = MaterialTheme.typography.titleMedium.copy(color = Color.White)) // Texto em branco
-                    Text(text = "$value1 $value1Unit", style = MaterialTheme.typography.headlineSmall.copy(color = Color.White)) // Texto em branco
+                    Text(text = "${if (sensorName == "DHT11") value1.toInt() else value1} $value1Unit", style = MaterialTheme.typography.headlineSmall.copy(color = Color.White)) // Texto em branco
                 }
 
                 // Linha divisória ajustada
@@ -134,7 +137,7 @@ fun SensorCardDualValues(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(text = value2Title, style = MaterialTheme.typography.titleMedium.copy(color = Color.White)) // Texto em branco
-                    Text(text = "$value2 $value2Unit", style = MaterialTheme.typography.headlineSmall.copy(color = Color.White)) // Texto em branco
+                    Text(text = "${if (sensorName == "DHT11") value2.toInt() else value2} $value2Unit", style = MaterialTheme.typography.headlineSmall.copy(color = Color.White)) // Texto em branco
                 }
             }
 
@@ -209,7 +212,7 @@ fun ValueInputDualCardExpandedPreview() {
                 .background(Color.Black)
                 .padding(16.dp)
         ) {
-            SensorCardDualValues("SDS011", "PM2.5", 999.9f, "µg/m³", "PM10", 999.9f, "µg/m³", true, listOf("Valores técnicos"))
+            SensorCardDualValues("SDS011", "PM2.5", 999.9f, "µg/m³", "PM10", 999.9f, "µg/m³", 4, true, listOf("Valores técnicos"))
         }
     }
 }

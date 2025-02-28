@@ -39,7 +39,14 @@ import androidx.compose.ui.unit.dp
 import com.example.airqualityapp.ui.theme.AirQualityAppTheme
 
 @Composable
-fun SensorCard(title: String, value: String, sensorName: String, expanded: Boolean = false, extraInfo: List<String> = emptyList(), modifier: Modifier = Modifier) {
+fun SensorCard(
+    title: String,
+    value: String,
+    sensorName: String,
+    priority: Int = 5,
+    expanded: Boolean = false,
+    extraInfo: List<String> = emptyList(),
+    modifier: Modifier = Modifier) {
     var isExpanded by remember { mutableStateOf(expanded) } // Estado de expansão do card
 
     Card(
@@ -83,11 +90,13 @@ fun SensorCard(title: String, value: String, sensorName: String, expanded: Boole
                     )
                 )
                 // Ícone
-                Icon(
-                    imageVector = Icons.Filled.Info,
-                    contentDescription = "Alerta",
-                    tint = Color.Yellow ,
-                )
+                if(priority < 5) {
+                    Icon(
+                        imageVector = Icons.Filled.Info,
+                        contentDescription = "Alerta",
+                        tint = Color.Yellow
+                    )
+                }
             }
             Text(
                 text = title,
@@ -167,7 +176,7 @@ fun ValueInputCardExpandedPreview() {
                 .background(Color.Black)
                 .padding(16.dp)
         ) {
-            SensorCard("Sensor 1", "Valor 1", "Sensor 1", true, listOf("Informações adicionais sobre o sensor.", "Mais dados técnicos do sensor podem ser exibidos aqui."))
+            SensorCard("Sensor 1", "Valor 1", "Sensor 1", 4, true, listOf("Informações adicionais sobre o sensor.", "Mais dados técnicos do sensor podem ser exibidos aqui."))
         }
     }
 }

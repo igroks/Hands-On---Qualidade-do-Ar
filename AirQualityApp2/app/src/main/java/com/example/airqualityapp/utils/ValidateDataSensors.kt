@@ -2,10 +2,10 @@ package com.example.airqualityapp.utils
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.airqualityapp.screens.DHT11
-import com.example.airqualityapp.screens.MQ9
-import com.example.airqualityapp.screens.SDS011
-import com.example.airqualityapp.screens.Sensors
+import com.example.airqualityapp.DHT11
+import com.example.airqualityapp.MQ9
+import com.example.airqualityapp.SDS011
+import com.example.airqualityapp.Sensors
 import com.example.airqualityapp.ui.theme.AirQualityAppTheme
 
 data class ValidatedData<T>(
