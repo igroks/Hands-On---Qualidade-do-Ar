@@ -4,16 +4,16 @@
 #include <linux/string.h>
 
 MODULE_AUTHOR("DevTITANS <devtitans@icomp.ufam.edu.br>");
-MODULE_DESCRIPTION("Driver de acesso ao SmartLamp (ESP32 com Chip Serial CP2102");
+MODULE_DESCRIPTION("Driver de acesso ao Airquality (ESP32 com Chip Serial CP2102");
 MODULE_LICENSE("GPL");
 
 #define MAX_RECV_LINE 100
 
-typedef struct AirQualityData {
+typedef struct SDS011 {
   int pm2_5;
   int pm10;
   bool isValid;
-} AirQualityData;
+} SDS011;
 
 typedef struct MQ9 {
   int sensor_volt;
@@ -22,16 +22,23 @@ typedef struct MQ9 {
   int gasCon;
 } MQ9;
 
+typedef struct DHT11 {
+  int temperature;
+  int humidity;
+} DHT11;
+
 typedef struct AllData {
-  AirQualityData data1;
-  MQ9 Data2;
+  SDS011 sds011;
+  MQ9 mq9;
+  DHT11 dht11;
 } AllData;
 
 static MQ9* mq9Data = NULL;
-static AirQualityData* sds011 = NULL;
+static SDS011* sds011 = NULL;
+static DHT11* dht11 = NULL;
 static AllData* sensor_data = NULL;
 
-static struct usb_device *smartlamp_device;
+static struct usb_device *airquality_device;
 static uint usb_in, usb_out;
 static char *usb_in_buffer, *usb_out_buffer;
 static int usb_max_size;
@@ -57,24 +64,24 @@ MODULE_DEVICE_TABLE(usb, id_table);
 bool ignore = true;
 int LDR_value = 0;
 
-static struct usb_driver smartlamp_driver = {
-    .name        = "smartlamp",
+static struct usb_driver airquality_driver = {
+    .name        = "airquality",
     .probe       = usb_probe,
     .disconnect  = usb_disconnect,
     .id_table    = id_table,
 };
 
-module_usb_driver(smartlamp_driver);
+module_usb_driver(airquality_driver);
 
 static int usb_probe(struct usb_interface *interface, const struct usb_device_id *id) {
     struct usb_endpoint_descriptor *usb_endpoint_in, *usb_endpoint_out;
 
-    printk(KERN_INFO "SmartLamp: Dispositivo conectado ...\n");
+    printk(KERN_INFO "Airquality: Dispositivo conectado ...\n");
 
     sys_obj = kobject_create_and_add("airquality", kernel_kobj);
     ignore = sysfs_create_group(sys_obj, &attr_group);
 
-    smartlamp_device = interface_to_usbdev(interface);
+    airquality_device = interface_to_usbdev(interface);
     ignore =  usb_find_common_endpoints(interface->cur_altsetting, &usb_endpoint_in, &usb_endpoint_out, NULL, NULL);
     usb_max_size = usb_endpoint_maxp(usb_endpoint_in);
     usb_in = usb_endpoint_in->bEndpointAddress;
@@ -86,7 +93,7 @@ static int usb_probe(struct usb_interface *interface, const struct usb_device_id
 }
 
 static void usb_disconnect(struct usb_interface *interface) {
-    printk(KERN_INFO "SmartLamp: Dispositivo desconectado.\n");
+    printk(KERN_INFO "Airquality: Dispositivo desconectado.\n");
     if (sys_obj) kobject_put(sys_obj);
     kfree(usb_in_buffer);
     kfree(usb_out_buffer);
@@ -100,9 +107,9 @@ static int usb_write_serial(char *cmd, int param) {
     sprintf(usb_out_buffer, "%s %d\n", cmd, param);
     printk(KERN_INFO "Enviando comando: %s", usb_out_buffer);
 
-    ret = usb_bulk_msg(smartlamp_device, usb_sndbulkpipe(smartlamp_device, usb_out), usb_out_buffer, strlen(usb_out_buffer), &actual_size, 1000);
+    ret = usb_bulk_msg(airquality_device, usb_sndbulkpipe(airquality_device, usb_out), usb_out_buffer, strlen(usb_out_buffer), &actual_size, 1000);
     if (ret) {
-        printk(KERN_ERR "SmartLamp: Erro de codigo %d ao enviar comando!\n", ret);
+        printk(KERN_ERR "Airquality: Erro de codigo %d ao enviar comando!\n", ret);
         return -1;
     }
 
@@ -124,7 +131,7 @@ static int usb_read_serial(void) {
 
     while (retries > 0) {
 
-        ret = usb_bulk_msg(smartlamp_device, usb_rcvbulkpipe(smartlamp_device, usb_in), usb_in_buffer, min(usb_max_size, MAX_RECV_LINE), &actual_size, 1000);
+        ret = usb_bulk_msg(airquality_device, usb_rcvbulkpipe(airquality_device, usb_in), usb_in_buffer, min(usb_max_size, MAX_RECV_LINE), &actual_size, 1000);
         if (ret) {
             printk(KERN_ERR "Driver Qualidade do Ar: Erro ao ler dados da USB (tentativa %d).\n", retries--);
             continue;
@@ -143,20 +150,26 @@ static int usb_read_serial(void) {
 
                 sensor_data = (AllData*) (pointer + 4);
                 if(!sensor_data) {
-                    printk(KERN_INFO "Eh nulo\n");
-                    return -1;
+                  printk(KERN_INFO "Eh nulo\n");
+                  return -1;
                 }
                 value = 1;
 
-                sds011 = &sensor_data->data1;
-                mq9Data = &sensor_data->Data2;
+                sds011 = &sensor_data->sds011;
+                mq9Data = &sensor_data->mq9;
+                dht11 = &sensor_data->dht11;
 
                 if(!sds011) {
-                    printk(KERN_INFO "Eh nulo\n");
-                    return -1;
+                  printk(KERN_INFO "Eh nulo\n");
+                  return -1;
                 }
 
                 if(!mq9Data) {
+                  printk(KERN_INFO "Eh nulo\n");
+                  return -1;
+                }
+
+                if(!dht11) {
                     printk(KERN_INFO "Eh nulo\n");
                     return -1;
                 }
@@ -169,6 +182,9 @@ static int usb_read_serial(void) {
                 printk(KERN_INFO "Dado recebido: RSGas = %d\n", (int)mq9Data->RS_gas);
                 printk(KERN_INFO "Dado recebido: sensorVolt = %d\n", (int)mq9Data->sensor_volt);
                 printk(KERN_INFO "Dado recebido: gasCon = %d\n", (int)mq9Data->gasCon);
+
+                printk(KERN_INFO "Dado recebido: temperature = %d\n", (int)dht11->temperature);
+                printk(KERN_INFO "Dado recebido: humidity = %d\n", (int)dht11->humidity);
 
                 return value;
             }
@@ -183,7 +199,7 @@ static ssize_t attr_show(struct kobject *sys_obj, struct kobj_attribute *attr, c
     int value = -1;
     const char *attr_name = attr->attr.name;
 
-    printk(KERN_INFO "SmartLamp: Lendo %s ...\n", attr_name);
+    printk(KERN_INFO "Airquality: Lendo %s ...\n", attr_name);
 
     value = usb_read_serial();
 
@@ -196,14 +212,16 @@ static ssize_t attr_show(struct kobject *sys_obj, struct kobj_attribute *attr, c
 
     // memcpy(buff, &sensor_data, sizeof(AllData));
 
-    sprintf(buff, "%d %d %d %d %d %d %d", 
-        sensor_data->data1.pm2_5, 
-        sensor_data->data1.pm10, 
-        sensor_data->data1.isValid,
-        sensor_data->Data2.sensor_volt,
-        sensor_data->Data2.RS_gas,
-        sensor_data->Data2.ratio,
-        sensor_data->Data2.gasCon);
+    sprintf(buff, "%d %d %d %d %d %d %d %d %d", 
+        sensor_data->sds011.pm2_5, 
+        sensor_data->sds011.pm10, 
+        sensor_data->sds011.isValid,
+        sensor_data->mq9.sensor_volt,
+        sensor_data->mq9.RS_gas,
+        sensor_data->mq9.ratio,
+        sensor_data->mq9.gasCon,
+        sensor_data->dht11.temperature,
+        sensor_data->dht11.humidity);
 
     return strlen(buff);
 }
@@ -214,16 +232,16 @@ static ssize_t attr_store(struct kobject *sys_obj, struct kobj_attribute *attr, 
 
     ret = kstrtol(buff, 10, &value);
     if (ret) {
-        printk(KERN_ALERT "SmartLamp: valor de %s invalido.\n", attr_name);
+        printk(KERN_ALERT "Airquality: valor de %s invalido.\n", attr_name);
         return -EACCES;
     }
 
-    printk(KERN_INFO "SmartLamp: Setando %s para %ld ...\n", attr_name, value);
+    printk(KERN_INFO "Airquality: Setando %s para %ld ...\n", attr_name, value);
 
     usb_write_serial("SET", value);
 
     if (ret < 0) {
-        printk(KERN_ALERT "SmartLamp: erro ao setar o valor do %s.\n", attr_name);
+        printk(KERN_ALERT "Airquality: erro ao setar o valor do %s.\n", attr_name);
         return -EACCES;
     }
 

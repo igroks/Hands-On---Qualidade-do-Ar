@@ -23,7 +23,7 @@ AirQuality *AirQuality::GetInstance() {
 
 int AirQuality::connect() {
     struct stat dirStat;
-    if (stat(this->dirPath, &dirStat) == 0) {
+    if (stat(this->dirPath.c_str(), &dirStat) == 0) {
         if (S_ISDIR(dirStat.st_mode))
             return 1;                                  // If the directory exists, return 1
     }
@@ -32,41 +32,38 @@ int AirQuality::connect() {
 
 void AirQuality::readFileValue() {
     int connected = this->connect();
+    int pm2_5, pm10, isValid, voltage, resistance, ratio, concentration, temperature, humidity;
     string ans;
-    int pm2_5, pm10, isValid, sensorVolt, rsGas, ratio, gasCon;
 
-    if (connected == 1) {                                 // Device is connected, let's read the value
-        ifstream file(this->dirPath);                     // Open the file from the kernel module
+    if (connected == 1) {                                                 // Device is connected, let's read the value
+        ifstream file(this->dirPath + "/" + this->fileName);              // Open the file from the kernel module
 
-        if (file.is_open()) {   
-            //getline(file, ans);                          // Check if the file opened successfully
-            // file >> ans;                                  // Read data into the sensor data
-	        //sscanf(ans.c_str(), "%d %d %d %d %d %d %d", &pm2_5, &pm10, &isValid, &sensorVolt, &rsGas, &ratio, &gasCon);
+        if (file.is_open()) {                                             // Check if the file opened successfully
+            getline(file, ans);                                           // Read data into the sensor data                     
+	        sscanf(ans.c_str(), "%d %d %d %d %d %d %d %d %d", &pm2_5, &pm10, &isValid, &voltage, &resistance, &ratio, &concentration, &temperature, &humidity);
             
-            //this->sensorData.sds011.pm2_5 = pm2_5;
-            this->sensorData.sds011.pm2_5 = 5;
-            //this->sensorData.sds011.pm10 = pm10;
-            this->sensorData.sds011.pm10 = 1;
-            //this->sensorData.sds011.isValid = isValid;
-            this->sensorData.sds011.isValid = 6;
-            //this->sensorData.mq9.sensorVolt = sensorVolt;
-            this->sensorData.mq9.sensorVolt = 10;
-            //this->sensorData.mq9.rsGas = rsGas;
-            this->sensorData.mq9.rsGas = 7;
-            //this->sensorData.mq9.ratio = ratio;
-            this->sensorData.mq9.ratio = 10;
-            //this->sensorData.mq9.gasCon = gasCon;
-            this->sensorData.mq9.gasCon = 7;
+            this->sensorData.sds011.pm2_5 = pm2_5;
+            this->sensorData.sds011.pm10 = pm10;
+
+            this->sensorData.mq9.voltage = voltage;
+            this->sensorData.mq9.resistance = resistance;
+            this->sensorData.mq9.ratio = ratio;
+            this->sensorData.mq9.concentration = concentration;
+
+            this->sensorData.dht11.temperature = temperature;
+            this->sensorData.dht11.humidity = humidity;
 
             file.close();
             time(&this->timestampLastUpdate);            // Update the timestamp of the last read
         } else {
             // Log or handle error if file cannot be opened
             cerr << "Error: Unable to open the sensor data file at " << this->dirPath << endl;
+            ALOG(LOG_ERROR, "Airquality", "Error: Unable to open the sensor data file");
         }
     } else {
         // Log or handle error if device is not connected
         cerr << "Error: Sensor device not connected." << endl;
+        ALOG(LOG_ERROR, "Airquality", "Error: Sensor device not connected.");
     }
 }
 
@@ -81,7 +78,7 @@ void AirQuality::validateCache() {
     }
 }
 
-vector<int> AirQuality::getSds011() {
+vector<int> AirQuality::getSDS011() {
     vector<int> vetor;
 
     this->validateCache();  // Ensure cache is validated before returning the data
@@ -91,13 +88,24 @@ vector<int> AirQuality::getSds011() {
     return vetor;
 }
 
-vector<int> AirQuality::getMq9() {
+vector<int> AirQuality::getMQ9() {
     vector<int> vetor;
 
     this->validateCache();  // Ensure cache is validated before returning the data
-    vetor.push_back(this->sensorData.mq9.sensorVolt);
-    vetor.push_back(this->sensorData.mq9.rsGas);
+    vetor.push_back(this->sensorData.mq9.voltage);
+    vetor.push_back(this->sensorData.mq9.resistance);
     vetor.push_back(this->sensorData.mq9.ratio);
+    vetor.push_back(this->sensorData.mq9.concentration);
+
+    return vetor;
+}
+
+vector<int> AirQuality::getDHT11() {
+    vector<int> vetor;
+
+    this->validateCache();  // Ensure cache is validated before returning the data
+    vetor.push_back(this->sensorData.dht11.temperature);
+    vetor.push_back(this->sensorData.dht11.humidity);
 
     return vetor;
 }
