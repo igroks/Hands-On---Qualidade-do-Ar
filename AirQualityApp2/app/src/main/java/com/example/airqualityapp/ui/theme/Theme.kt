@@ -56,3 +56,4 @@ fun AirQualityAppTheme(
         content = content
     )
 }
+
