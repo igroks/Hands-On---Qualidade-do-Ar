@@ -25,6 +25,12 @@ import kotlinx.coroutines.delay
 // splash_screen.xml.
 @Composable
 fun SplashScreen(navController: NavHostController) {
+    LaunchedEffect(Unit) {
+        delay(5000L) // Tempo de exibição da SplashScreen (2 segundos)
+        navController.navigate("home") {
+            popUpTo("splash") { inclusive = true } // Remove a SplashScreen da pilha
+        }
+    }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -39,12 +45,6 @@ fun SplashScreen(navController: NavHostController) {
             ),
             modifier = Modifier.align(Alignment.Center)
         )
-    }
-    LaunchedEffect(Unit) {
-        delay(3000) // Aguarda 5 segundos antes de navegar para a Home
-        navController.navigate("home") {
-            popUpTo("splash") { inclusive = true } // Remove a Splash da pilha de navegação
-        }
     }
 }
 

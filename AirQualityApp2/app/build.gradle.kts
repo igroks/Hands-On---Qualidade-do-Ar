@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -64,4 +65,19 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
+
+    api(libs.osmdroid.android)
+    implementation(libs.commons.lang3)
+    api(libs.gson)
+    implementation(libs.okhttp)
+    implementation(libs.androidx.core)
+
+    implementation(libs.osmdroid.mapsforge)
+    implementation(libs.mapsforge.map.android)
+    implementation(libs.mapsforge.map)
+    implementation(libs.mapsforge.themes)
+    implementation(libs.androidx.legacy.support.v4)
+
+    implementation(libs.firebase.bom)
+    implementation(libs.firebase.firestore)
 }

@@ -96,7 +96,7 @@ fun AirQualitySummary(
             }
             Text(
                 text = "IQA: $iqa",
-                style = MaterialTheme.typography.headlineLarge.copy(color = Color.White)
+                style = MaterialTheme.typography.displayMedium.copy(color = Color.White)
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
