@@ -66,6 +66,10 @@ dependencies {
     implementation(libs.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
 
+    // Animation
+    implementation(libs.androidx.animation)
+
+    // Android Map
     api(libs.osmdroid.android)
     implementation(libs.commons.lang3)
     api(libs.gson)
@@ -78,6 +82,6 @@ dependencies {
     implementation(libs.mapsforge.themes)
     implementation(libs.androidx.legacy.support.v4)
 
-    implementation(libs.firebase.bom)
+    implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.firestore)
 }

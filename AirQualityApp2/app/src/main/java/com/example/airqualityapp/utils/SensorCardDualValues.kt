@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
@@ -39,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.airqualityapp.ui.theme.AirQualityAppTheme
+import com.example.airqualityapp.ui.theme.*
 
 @Composable
 fun SensorCardDualValues(
@@ -70,7 +70,7 @@ fun SensorCardDualValues(
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp, focusedElevation = 2.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0x43B3B3B3) // Cor preta com transparência (80% opacidade)
+            containerColor = LightGrayTranslucent // Cor preta com transparência (80% opacidade)
         )
     ) {
         Column(
@@ -99,13 +99,7 @@ fun SensorCardDualValues(
                 )
 
                 // Ícone
-                if(priority < 5) {
-                    Icon(
-                        imageVector = Icons.Filled.Info,
-                        contentDescription = "Alerta",
-                        tint = Color.Yellow
-                    )
-                }
+                BlinkingIcon(priority)
             }
 
             Row(
@@ -120,7 +114,7 @@ fun SensorCardDualValues(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(text = value1Title, style = MaterialTheme.typography.titleMedium.copy(color = Color.White)) // Texto em branco
-                    Text(text = "${if (sensorName == "DHT11") value1.toInt() else value1} $value1Unit", style = MaterialTheme.typography.headlineSmall.copy(color = Color.White)) // Texto em branco
+                    Text(text = "${if (sensorName == "DHT11") value1.toInt() else value1} $value1Unit", style = MaterialTheme.typography.titleLarge.copy(color = Color.White)) // Texto em branco
                 }
 
                 // Linha divisória ajustada
@@ -137,7 +131,7 @@ fun SensorCardDualValues(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(text = value2Title, style = MaterialTheme.typography.titleMedium.copy(color = Color.White)) // Texto em branco
-                    Text(text = "${if (sensorName == "DHT11") value2.toInt() else value2} $value2Unit", style = MaterialTheme.typography.headlineSmall.copy(color = Color.White)) // Texto em branco
+                    Text(text = "${if (sensorName == "DHT11") value2.toInt() else value2} $value2Unit", style = MaterialTheme.typography.titleLarge.copy(color = Color.White)) // Texto em branco
                 }
             }
 

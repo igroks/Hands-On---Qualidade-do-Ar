@@ -6,7 +6,6 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -77,7 +76,8 @@ class MainActivity : ComponentActivity() {
             sensorManager.registerListener(dht11listener, sensor3, SensorManager.SENSOR_DELAY_NORMAL)
 
             Log.d("Sensors", "Sensor 1: ${sensor1.name}, Sensor 2: ${sensor2.name}, Sensor 3: ${sensor3.name}")
-            getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
+            val sharedPreferences = getSharedPreferences("sensor_data_prefs", Context.MODE_PRIVATE)
+            getInstance().load(this, sharedPreferences)
 
         }
 

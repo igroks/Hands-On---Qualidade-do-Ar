@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
@@ -37,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.airqualityapp.ui.theme.AirQualityAppTheme
+import com.example.airqualityapp.ui.theme.LightGrayTranslucent
 
 @Composable
 fun SensorCard(
@@ -63,7 +63,7 @@ fun SensorCard(
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp, focusedElevation = 2.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0x43B3B3B3) // Cor preta com transparência (80% opacidade)
+            containerColor = LightGrayTranslucent // Cor preta com transparência (80% opacidade)
         )
     ) {
         Column(
@@ -90,13 +90,7 @@ fun SensorCard(
                     )
                 )
                 // Ícone
-                if(priority < 5) {
-                    Icon(
-                        imageVector = Icons.Filled.Info,
-                        contentDescription = "Alerta",
-                        tint = Color.Yellow
-                    )
-                }
+                BlinkingIcon(priority)
             }
             Text(
                 text = title,

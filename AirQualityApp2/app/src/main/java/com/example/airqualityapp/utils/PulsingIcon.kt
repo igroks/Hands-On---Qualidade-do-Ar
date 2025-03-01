@@ -3,7 +3,9 @@ package com.example.airqualityapp.utils
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -20,6 +22,32 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.airqualityapp.ui.theme.AirQualityAppTheme
+import androidx.compose.animation.core.InfiniteRepeatableSpec
+import com.example.airqualityapp.ui.theme.GoldenYellow
+
+@Composable
+fun BlinkingIcon(priority: Int) {
+    val transition = rememberInfiniteTransition()
+
+    // Animar opacidade para dar o efeito de piscar
+    val alpha by transition.animateFloat(
+        targetValue = if (priority < 5) 1f else 0f,
+        animationSpec = InfiniteRepeatableSpec(
+            animation = tween(durationMillis = 500, delayMillis = 200),
+            repeatMode = RepeatMode.Reverse
+        ),
+        initialValue = 0.5f,
+        label = "Waring"
+    )
+
+    if (priority < 5) {
+        Icon(
+            imageVector = Icons.Filled.Info,
+            contentDescription = "Alerta",
+            tint = GoldenYellow.copy(alpha = alpha) // Aplica a opacidade para o piscar
+        )
+    }
+}
 
 @Composable
 fun PulsingIcon(

@@ -40,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.airqualityapp.ui.theme.AirQualityAppTheme
+import com.example.airqualityapp.ui.theme.*
 
 @Composable
 fun InfoCard(
@@ -71,7 +72,7 @@ fun InfoCard(
                 )
                 .clickable { isExpanded = !isExpanded },
             colors = CardDefaults.cardColors(
-                containerColor = if (isExpanded) Color(0x55424242) else Color(0x43B3B3B3)
+                containerColor = if (isExpanded) DarkGrayTranslucent else LightGrayTranslucent
             ),
             shape = RoundedCornerShape(16.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp, focusedElevation = 2.dp),
@@ -114,7 +115,7 @@ fun InfoCard(
                         spotColor = Color.Transparent
                     )
                 ,
-                colors = CardDefaults.cardColors(containerColor = Color(0x33212121)),
+                colors = CardDefaults.cardColors(containerColor = SoftBlackTranslucent),
                 shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
                 elevation = CardDefaults.cardElevation(
                     defaultElevation = 0.dp,

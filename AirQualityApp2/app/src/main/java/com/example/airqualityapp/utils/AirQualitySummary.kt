@@ -28,6 +28,7 @@ import com.example.airqualityapp.ui.theme.AirQualityAppTheme
 import kotlinx.coroutines.delay
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import com.example.airqualityapp.ui.theme.*
 
 data class QualityStatus(
     val status: String,
@@ -37,11 +38,11 @@ data class QualityStatus(
 @Composable
 fun airQualityStatus(value: Int): QualityStatus {
     val (statusText, statusColor) = when {
-        value <= 40 -> "Boa" to Color(0xFF4CAF50)
-        value <= 80 -> "Moderada" to Color(0xFFFFEB3B)
-        value <= 120 -> "Ruim" to Color(0xFFFF9800)
-        value <= 200 -> "Péssima" to Color(0xFFF44336)
-        else -> "Crítica" to Color(0xFF990066)
+        value <= 40 -> "Boa" to MediumGreen
+        value <= 80 -> "Moderada" to GoldenYellow
+        value <= 120 -> "Ruim" to VividOrange
+        value <= 200 -> "Péssima" to IntenseRed
+        else -> "Crítica" to WinePurple
     }
     return QualityStatus(status = statusText, color = statusColor)
 }
@@ -122,7 +123,7 @@ fun AirQualitySummary(
                     .fillMaxWidth()
                     .padding(2.dp).padding(top = 16.dp)
                     .border(
-                        width = 2.dp, // Largura da borda
+                        width = 3.dp, // Largura da borda
                         color = airQualityStatus.color, // Cor sólida da borda (altere conforme necessário)
                         shape = RoundedCornerShape(16.dp) // Mesma curvatura do Card
                     )

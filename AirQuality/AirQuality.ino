@@ -138,7 +138,7 @@ void loop() {
 
     //alert = digitalRead(DO);
 
-    /*
+    ///*
     if (data1.isValid) {
       Serial.println("---Data1---");
       Serial.print("PM2.5: ");
@@ -172,8 +172,8 @@ void loop() {
     Serial.print("%.");
     Serial.println("\n\n");
     
-    */
-    ///*
+    //*/
+    /*
     //(RES struct /n)
     if(data1.isValid) {
       result.data1 = data1;
@@ -188,9 +188,7 @@ void loop() {
     Serial.print("RES ");
     Serial.write((byte*)&result, sizeof(result));
     Serial.print(" \n");
-    //*/
-    /*if(alert==1) digitalWrite(LED, HIGH);
-    else if(alert == 0) digitalWrite(LED, lOW);*/
+    */
   }
   
   delay(1000);
