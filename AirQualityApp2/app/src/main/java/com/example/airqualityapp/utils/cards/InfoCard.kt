@@ -1,4 +1,4 @@
-package com.example.airqualityapp.utils
+package com.example.airqualityapp.utils.cards
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically

@@ -16,9 +16,9 @@ import com.example.airqualityapp.SDS011
 import com.example.airqualityapp.DHT11
 import com.example.airqualityapp.Sensors
 import com.example.airqualityapp.ui.theme.AirQualityAppTheme
-import com.example.airqualityapp.utils.AirQualitySummary
-import com.example.airqualityapp.utils.SensorCard
-import com.example.airqualityapp.utils.SensorCardDualValues
+import com.example.airqualityapp.utils.cards.AirQualitySummary
+import com.example.airqualityapp.utils.cards.SensorCard
+import com.example.airqualityapp.utils.cards.SensorCardDualValues
 import com.example.airqualityapp.utils.getBackgroundGradient
 import com.example.airqualityapp.utils.validateDataSensors
 import java.time.LocalTime
@@ -45,8 +45,8 @@ fun HomeScreen(sensors: Sensors, currentTime: LocalTime = LocalTime.now()) {
         ) {
             item {
                 AirQualitySummary(
-                    city = "São Paulo", 
-                    state = "SP", 
+                    city = "Manaus",
+                    state = "AM",
                     pm25 = sds011.pm25, 
                     pm10 = sds011.pm10, 
                     co = mq9.carbonMonoxide)

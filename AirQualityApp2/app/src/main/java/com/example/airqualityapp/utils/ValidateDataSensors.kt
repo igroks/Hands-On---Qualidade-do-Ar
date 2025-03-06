@@ -11,7 +11,7 @@ import com.example.airqualityapp.ui.theme.AirQualityAppTheme
 data class ValidatedData<T>(
     val sensor: T,
     val priority: Int = 0,
-    val extraInfo: List<String> = emptyList()
+    val extraInfo: List<String?> = emptyList()
 )
 
 // Níveis de prioridade
@@ -30,7 +30,7 @@ fun heatIndexPriority(value: Double): Priority = when {
 
 // Prioridade do resfriamento evaporativo
 fun windChillPriority(value: Double): Priority = when {
-    value > 10 -> Priority.P1
+    value > 10.0 -> Priority.P1
     value in 0.0..10.0 -> Priority.P2
     value in -10.0..0.0 -> Priority.P3
     value in -28.0..-10.0 -> Priority.P4
@@ -39,7 +39,7 @@ fun windChillPriority(value: Double): Priority = when {
 
 // Prioridade do ponto de orvalho
 fun dewPointPriority(value: Double): Priority = when {
-    value < 10 -> Priority.P1
+    value < 10.0 -> Priority.P1
     value in 10.0..15.0 -> Priority.P2
     value in 16.0..20.0 -> Priority.P3
     value in 21.0..24.0 -> Priority.P4
@@ -84,6 +84,91 @@ fun sdsPriority(sensor: SDS011): Priority = listOf(
 
 fun mq9Priority(sensor: MQ9): Priority = coPriority(sensor.carbonMonoxide)
 
+fun handleExtraInfoDHT11(sensor: DHT11): List<String?> {
+    val showHeatIndex: Boolean
+    val showWindChill: Boolean
+    val showDewPoint: Boolean
+
+    val heatIndex = calculateHeatIndex(
+        sensor.temperature,
+        sensor.humidity
+    )
+
+    val windChill = calculateWindChill(
+        sensor.temperature
+    )
+
+    val dewPoint = calculateDewPoint(
+        sensor.temperature,
+        sensor.humidity
+    )
+
+    showHeatIndex = heatIndex in 24.0..27.00
+    showWindChill = windChill in -28.0..10.0
+    showDewPoint = dewPoint in 10.0..24.0
+
+    return listOfNotNull(
+        heatIndexExtraInfo.find {
+            it.first == heatIndexPriority(heatIndex).value}?.let {
+                if(showHeatIndex) {
+                    "Sensação Térmica: ${
+                        calculateHeatIndex(
+                            sensor.temperature,
+                            sensor.humidity
+                        ).toInt()
+                    } °C\nStatus: ${it.second}\n${it.third}"
+                } else null
+        },
+        windChillExtraInfo.find {
+            it.first == windChillPriority(windChill).value}?.let {
+                if(showWindChill) {
+                    "Resfriamento Evaporativo: ${
+                        calculateWindChill(
+                            sensor.temperature
+                        ).toInt()
+                    } °C\nStatus: ${it.second}\n${it.third}"
+                } else null
+        },
+        dewPointExtraInfo.find {
+            it.first == dewPointPriority(dewPoint).value}?.let {
+                if(showDewPoint) {
+                    "Ponto de Orvalho: ${
+                        calculateDewPoint(
+                            sensor.temperature, sensor.humidity
+                        ).toInt()
+                    } °C\nStatus: ${it.second}\n${it.third}"
+                } else null
+        },
+    )
+}
+
+fun handleExtraInfoSDS011(sensor: SDS011): List<String?> {
+    return listOf(
+        pm25ExtraInfo.find {it.first == pm25Priority(sensor.pm25.toDouble()).value }?.let {
+            "PM2.5 Status: ${it.second}\nFatores: ${it.third}"
+        },
+        pm10ExtraInfo.find {it.first == pm10Priority(sensor.pm10.toDouble()).value }?.let {
+            "PM10 Status: ${it.second}\nFatores: ${it.third}"
+        },
+    )
+}
+
+fun handleExtraInfoMQ9(sensor: MQ9): List<String?> {
+    return listOf(
+        coExtraInfo.find {it.first == coPriority(sensor.carbonMonoxide).value }?.let {
+            "CO Status: ${it.second}\nFatores: ${it.third}"
+        },
+    )
+}
+
+fun handleExtraInfo(sensors: Sensors, typeSensor: Int): List<String?> {
+    return when (typeSensor) {
+        0 -> handleExtraInfoDHT11(sensors.dht11)
+        1 -> handleExtraInfoSDS011(sensors.sds011)
+        else -> handleExtraInfoMQ9(sensors.mq9)
+    }
+}
+
 @Composable
 fun validateDataSensors(sensors: Sensors): List<ValidatedData<*>> {
     val dhtPriority = dht11Priority(sensors.dht11)
@@ -94,17 +179,17 @@ fun validateDataSensors(sensors: Sensors): List<ValidatedData<*>> {
         ValidatedData(
             sensor = sensors.dht11,
             priority = dhtPriority.value,
-            extraInfo = listOf("Sensor de temperatura e umidade", "${dhtPriority.value}")
+            extraInfo = handleExtraInfo(sensors, 0)
         ),
         ValidatedData(
             sensor = sensors.sds011,
             priority = sdsPriority.value,
-            extraInfo = listOf("Monitoramento de partículas PM2.5 e PM10", "${sdsPriority.value}")
+            extraInfo = handleExtraInfo(sensors, 1)
         ),
         ValidatedData(
             sensor = sensors.mq9,
             priority = mq9Priority.value,
-            extraInfo = listOf("Detecção de monóxido de carbono", "${mq9Priority.value}")
+           extraInfo = handleExtraInfo(sensors, 2)
         )
     )
 }

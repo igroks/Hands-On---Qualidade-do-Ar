@@ -19,7 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.airqualityapp.ui.theme.AirQualityAppTheme
-import com.example.airqualityapp.utils.InfoCard
+import com.example.airqualityapp.utils.cards.InfoCard
 import com.example.airqualityapp.utils.getBackgroundGradient
 
 val questions = listOf(

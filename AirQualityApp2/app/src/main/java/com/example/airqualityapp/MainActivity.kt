@@ -32,6 +32,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.airqualityapp.screens.FaqScreen
 import com.example.airqualityapp.screens.HomeScreen
 import com.example.airqualityapp.screens.MapScreen
+import com.example.airqualityapp.screens.OnboardingScreen
 import com.example.airqualityapp.screens.SplashScreen
 import com.example.airqualityapp.ui.theme.AirQualityAppTheme
 import com.example.airqualityapp.utils.getBackgroundGradient
@@ -144,7 +145,7 @@ fun AirQualityApp(sensors: Sensors = Sensors(DHT11(), SDS011(), MQ9())) {
             .background(backgroundGradient),
         containerColor = Color.Black.copy(alpha = 0.4f), // Transparência acinzentada no fundo do Scaffold
         topBar = {
-            if(currentRoute != "splash") TabRow(
+            if(currentRoute != "splash" && currentRoute != "onboarding") TabRow(
                 selectedTabIndex = selectedTabIndex,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -187,6 +188,9 @@ fun AirQualityApp(sensors: Sensors = Sensors(DHT11(), SDS011(), MQ9())) {
             composable("home") { HomeScreen(sensors) }
             composable("map") { MapScreen("AirQualityMap") }
             composable("faq") { FaqScreen() }
+            composable("onboarding") {
+                OnboardingScreen(0, navController)
+            }
         }
     }
 //    if (currentRoute != "splash") {

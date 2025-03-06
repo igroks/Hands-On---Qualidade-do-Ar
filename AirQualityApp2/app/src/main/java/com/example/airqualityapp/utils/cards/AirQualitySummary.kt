@@ -1,7 +1,6 @@
-package com.example.airqualityapp.utils
+package com.example.airqualityapp.utils.cards
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,8 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,7 +16,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,6 +25,7 @@ import kotlinx.coroutines.delay
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import com.example.airqualityapp.ui.theme.*
+import com.example.airqualityapp.utils.calculateIQA
 
 data class QualityStatus(
     val status: String,
@@ -99,10 +96,13 @@ fun AirQualitySummary(
                 text = "IQA: $iqa",
                 style = MaterialTheme.typography.displayMedium.copy(color = Color.White)
             )
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.padding(bottom = 20.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
                     text = "Qualidade: ",
-                    style = MaterialTheme.typography.bodyMedium.copy(
+                    style = MaterialTheme.typography.bodyLarge.copy(
                         color = Color.White, fontWeight = FontWeight.Bold
                     )
                 )
@@ -114,41 +114,11 @@ fun AirQualitySummary(
                     Text(
                         text = airQualityStatus.status,
                         color = Color.White,
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
                     )
                 }
             }
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(2.dp).padding(top = 16.dp)
-                    .border(
-                        width = 3.dp, // Largura da borda
-                        color = airQualityStatus.color, // Cor sólida da borda (altere conforme necessário)
-                        shape = RoundedCornerShape(16.dp) // Mesma curvatura do Card
-                    )
-                    .shadow(
-                        elevation = 6.dp,
-                        shape = RoundedCornerShape(16.dp),
-                        ambientColor = Color.Transparent,
-                        spotColor = Color.Transparent
-                    )
-                ,
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp, focusedElevation = 2.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0x33212121) // Cor preta com transparência (80% opacidade)
-                )
-            ) {
-                Text(
-                    modifier = Modifier.padding(16.dp),
-                    text = "Uma descrição do IQA",
-                    style = MaterialTheme.typography.bodySmall
-                        .copy(
-                        color = Color.White // Cor do texto alterada para branco
-                    )
-                )
-            }
+            ResumeCard(airQualityStatus)
         }
     }
 }

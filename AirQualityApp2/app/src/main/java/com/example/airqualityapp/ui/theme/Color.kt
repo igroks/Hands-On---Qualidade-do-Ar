@@ -45,3 +45,4 @@ val DarkNightBlue = Color(0xFF0E0E41)           // Azul Escuro Noturno
 val DarkGrayTranslucent = Color(0x85424242)      // Cinza Escuro Translúcido
 val LightGrayTranslucent = Color(0x53B3B3B3)     // Cinza Claro Translúcido
 val SoftBlackTranslucent = Color(0x33212121)     // Preto Suave Translúcido
+val lightBackTranslucent = Color(0x33212121)     // Preto Claro Translúcido

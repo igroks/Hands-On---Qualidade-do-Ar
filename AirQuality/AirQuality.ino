@@ -43,6 +43,24 @@ struct AllData {
 int alert = 0;
 float R0 = 9.6;
 
+Float calibrateMq9() {
+	float sensor_volt;
+  	float RS_air;
+  	float R0;
+  	float sensorValue;
+
+  	for( int x = 0; x < 100; x++) {
+    	sensorValue = sensorValue + analogRead(AO);
+  	}
+
+  	sensorValue = sensorValue / 100.0;
+
+  	sensor_volt = ((float)sensorValue / 4095.0) * 3.3;
+  	RS_air = ((3.3 * RL)/sensor_volt) - RL;
+  	R0 = RS_air / 9.9;
+  	return R0;
+}
+
 // Função para ler os dados da serial
 SDS011 readSDS011() {
   SDS011 data1 = {0, 0, false};
@@ -120,6 +138,8 @@ void setup() {
 }
 
 void loop() {
+
+  R0 = calibrateMq9();
   
   if(Serial.available() > 0) {
     String cmd = Serial.readString();
@@ -138,7 +158,7 @@ void loop() {
 
     //alert = digitalRead(DO);
 
-    ///*
+    /*
     if (data1.isValid) {
       Serial.println("---Data1---");
       Serial.print("PM2.5: ");
@@ -171,9 +191,8 @@ void loop() {
     Serial.print(data3.humidity);
     Serial.print("%.");
     Serial.println("\n\n");
-    
-    //*/
-    /*
+    */
+    ///*
     //(RES struct /n)
     if(data1.isValid) {
       result.data1 = data1;
@@ -188,7 +207,7 @@ void loop() {
     Serial.print("RES ");
     Serial.write((byte*)&result, sizeof(result));
     Serial.print(" \n");
-    */
+    //*/
   }
   
   delay(1000);

@@ -1,4 +1,4 @@
-package com.example.airqualityapp.utils
+package com.example.airqualityapp.utils.cards
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -8,13 +8,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -38,22 +36,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.airqualityapp.ui.theme.AirQualityAppTheme
-import com.example.airqualityapp.ui.theme.*
+import com.example.airqualityapp.ui.theme.LightGrayTranslucent
+import com.example.airqualityapp.utils.BlinkingIcon
 
 @Composable
-fun SensorCardDualValues(
+fun SensorCard(
+    title: String,
+    value: String,
     sensorName: String,
-    value1Title: String,
-    value1: Float,
-    value1Unit: String,
-    value2Title: String,
-    value2: Float,
-    value2Unit: String,
     priority: Int = 5,
     expanded: Boolean = false,
-    extraInfo: List<String> = emptyList(),
-    modifier: Modifier = Modifier
-) {
+    extraInfo: List<String?> = emptyList(),
+    modifier: Modifier = Modifier) {
     var isExpanded by remember { mutableStateOf(expanded) } // Estado de expansão do card
 
     Card(
@@ -77,7 +71,7 @@ fun SensorCardDualValues(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-                .animateContentSize(  // Anima a mudança de tamanho do conteúdo
+                .animateContentSize(  // Anima qualquer mudança de tamanho no conteúdo
                     animationSpec = tween(
                         durationMillis = 300,
                         easing = FastOutSlowInEasing
@@ -89,7 +83,6 @@ fun SensorCardDualValues(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Nome do sensor
                 Text(
                     text = "Sensor: $sensorName",
                     style = MaterialTheme.typography.titleMedium.copy(
@@ -97,68 +90,42 @@ fun SensorCardDualValues(
                         color = Color.White // Cor do texto alterada para branco
                     )
                 )
-
                 // Ícone
                 BlinkingIcon(priority)
             }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium.copy(color = Color.White) // Texto em branco
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.headlineSmall.copy(color = Color.White) // Texto em branco
+            )
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Min),  // Garante que a altura se ajuste ao conteúdo
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // Valor 1
-                Column(
-                    modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(text = value1Title, style = MaterialTheme.typography.titleMedium.copy(color = Color.White)) // Texto em branco
-                    Text(text = "${if (sensorName == "DHT11") value1.toInt() else value1} $value1Unit", style = MaterialTheme.typography.titleLarge.copy(color = Color.White)) // Texto em branco
-                }
-
-                // Linha divisória ajustada
-                Box(
-                    modifier = Modifier
-                        .width(1.dp)
-                        .fillMaxHeight()
-                        .background(color = Color.White)
-                )
-
-                // Valor 2
-                Column(
-                    modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(text = value2Title, style = MaterialTheme.typography.titleMedium.copy(color = Color.White)) // Texto em branco
-                    Text(text = "${if (sensorName == "DHT11") value2.toInt() else value2} $value2Unit", style = MaterialTheme.typography.titleLarge.copy(color = Color.White)) // Texto em branco
-                }
-            }
-
-            // Informações adicionais ao expandir
+            // Texto + Seta para expandir/contrair
+            // Informações adicionais
             if (isExpanded) {
-                HorizontalDivider(
-                    modifier = Modifier.padding(top = 8.dp),
-                    thickness = 1.dp,
-                    color = Color.White
-                )
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    extraInfo.forEach{
-                        Text(it, style = MaterialTheme.typography.bodySmall.copy(color = Color.White))
+                extraInfo.forEach{
+                    HorizontalDivider(
+                        modifier = Modifier.padding(top = 8.dp),
+                        thickness = 1.dp,
+                        color = Color.White
+                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
+                    ) {
+                        if (it != null) {
+                            Text(it, style = MaterialTheme.typography.bodyMedium.copy(color = Color.White))
+                        }
                     }
                 }
             }
-            // Texto + Seta para expandir/contrair (centralizado corretamente)
+            Spacer(modifier = Modifier.height(4.dp))
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp)
-                ,
+                    .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
@@ -166,7 +133,7 @@ fun SensorCardDualValues(
                     text = "Mostrar mais ",
                     modifier = Modifier
                         .clickable { isExpanded = !isExpanded }
-                    //.align(Alignment.CenterHorizontally),
+                        //.align(Alignment.CenterHorizontally),
                     , style = MaterialTheme.typography.bodyMedium.copy(
                         color = Color.White
                     )
@@ -183,7 +150,7 @@ fun SensorCardDualValues(
 
 @Preview(showBackground = true)
 @Composable
-fun ValueInputDualCardPreview() {
+fun ValueInputCardPreview() {
     AirQualityAppTheme {
         Box(
             modifier = Modifier
@@ -191,14 +158,14 @@ fun ValueInputDualCardPreview() {
                 .background(Color.Black)
                 .padding(16.dp)
         ) {
-            SensorCardDualValues("SDS011", "PM2.5", 999.9f, "µg/m³", "PM10", 999.9f, "µg/m³")
+            SensorCard("Sensor 1", "Valor 1", "Sensor 1")
         }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun ValueInputDualCardExpandedPreview() {
+fun ValueInputCardExpandedPreview() {
     AirQualityAppTheme {
         Box(
             modifier = Modifier
@@ -206,7 +173,7 @@ fun ValueInputDualCardExpandedPreview() {
                 .background(Color.Black)
                 .padding(16.dp)
         ) {
-            SensorCardDualValues("SDS011", "PM2.5", 999.9f, "µg/m³", "PM10", 999.9f, "µg/m³", 4, true, listOf("Valores técnicos"))
+            SensorCard("Sensor 1", "Valor 1", "Sensor 1", 4, true, listOf("Informações adicionais sobre o sensor.", "Mais dados técnicos do sensor podem ser exibidos aqui."))
         }
     }
 }

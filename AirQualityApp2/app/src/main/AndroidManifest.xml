@@ -13,6 +13,15 @@
         android:theme="@style/Theme.AirQualityApp"
         tools:targetApi="31">
         <activity
+            android:name=".utils.cards.ResumeCard"
+            android:exported="false" />
+        <activity
+            android:name=".utils.Descriptions"
+            android:exported="false" />
+        <activity
+            android:name=".screens.FirstEntryResume"
+            android:exported="false" />
+        <activity
             android:name=".utils.calculateIQA"
             android:exported="false" />
         <activity

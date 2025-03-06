@@ -1,6 +1,7 @@
 package com.example.airqualityapp.utils
 
 
+import android.util.Log
 import kotlin.math.*
 
 data class PollutantRange(
@@ -72,6 +73,8 @@ fun calculateDewPoint(temperature: Float, humidity: Float): Double {
     // Fórmula de Magnus-Tetens para o ponto de orvalho
     val a = 17.27
     val b = 237.7
-    val alpha = ((a * temperature) / (b + temperature)) + ln(humidity / 100)
+    val hum = if(humidity == 0f) 0.01f else humidity
+    val alpha = ((a * temperature) / (b + temperature)) + ln(hum / 100.0)
+    Log.d(((b * alpha) / (a - alpha)).toString(), "dew")
     return (b * alpha) / (a - alpha)
 }
