@@ -21,6 +21,11 @@ import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
@@ -57,76 +62,67 @@ data class Sensors(
 )
 
 class MainActivity : ComponentActivity() {
-   private var sensors: Sensors = Sensors(DHT11(), SDS011(), MQ9())
     private lateinit var sensorManager: SensorManager
+
     @SuppressLint("InflateParams")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        val sensorList = sensorManager.getSensorList(Sensor.TYPE_DEVICE_PRIVATE_BASE)
-
-        if (sensorList.isNotEmpty()) {
-
-            val sensor1 = sensorList[0]
-            val sensor2 = sensorList[1]
-            val sensor3 = sensorList[2]
-
-            sensorManager.registerListener(sds011listener, sensor1, SensorManager.SENSOR_DELAY_NORMAL)
-            sensorManager.registerListener(mq9listener, sensor2, SensorManager.SENSOR_DELAY_NORMAL)
-            sensorManager.registerListener(dht11listener, sensor3, SensorManager.SENSOR_DELAY_NORMAL)
-
-            Log.d("Sensors", "Sensor 1: ${sensor1.name}, Sensor 2: ${sensor2.name}, Sensor 3: ${sensor3.name}")
-            val sharedPreferences = getSharedPreferences("sensor_data_prefs", Context.MODE_PRIVATE)
-            getInstance().load(this, sharedPreferences)
-
-        }
 
         setContent {
+            var sensors by remember { mutableStateOf(Sensors(DHT11(), SDS011(), MQ9())) }
+
+            val sensorListener: SensorEventListener = object : SensorEventListener {
+                override fun onSensorChanged(event: SensorEvent) {
+                    sensors = sensors.copy(
+                        mq9 = MQ9(
+                            carbonMonoxide = event.values[5]
+                        ),
+                        dht11 = DHT11(
+                            temperature = event.values[6],
+                            humidity = event.values[7]
+                        ),
+                        sds011 = SDS011(
+                            pm10 = event.values[0],
+                            pm25 = event.values[1]
+                        )
+                    )
+                    Log.d("AirQualityApp", sensors.toString())
+                }
+
+                override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
+                }
+            }
+
+            val sensorList = sensorManager.getSensorList(Sensor.TYPE_DEVICE_PRIVATE_BASE)
+
+            if (sensorList.isNotEmpty()) {
+                val sensor = sensorList[3]
+
+                sensorManager.registerListener(sensorListener, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+
+                val sharedPreferences = getSharedPreferences("sensor_data_prefs", Context.MODE_PRIVATE)
+                getInstance().load(this, sharedPreferences)
+
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    sensorManager.unregisterListener(sensorListener)
+                }
+            }
+
             AirQualityAppTheme {
                 AirQualityApp(sensors)
             }
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        sensorManager.unregisterListener(dht11listener)
-        sensorManager.unregisterListener(sds011listener)
-        sensorManager.unregisterListener(mq9listener)
-    }
-    private val sds011listener: SensorEventListener = object : SensorEventListener {
-        override fun onSensorChanged(event: SensorEvent) {
-            // The value of the first subscript in the values array is the current light intensity
-            Log.d("SDS011", "PM2.5: ${event.values[0]}, PM10: ${event.values[1]}")
-            sensors.sds011.pm25 = event.values[0]
-            sensors.sds011.pm10 = event.values[1]
-        }
-
-        override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
-        }
-    }
-
-    private val mq9listener: SensorEventListener = object : SensorEventListener {
-        override fun onSensorChanged(event: SensorEvent) {
-            // The value of the first subscript in the values array is the current light intensity
-            sensors.mq9.carbonMonoxide = event.values[2]
-        }
-
-        override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
-        }
-    }
-
-    private val dht11listener: SensorEventListener = object : SensorEventListener {
-        override fun onSensorChanged(event: SensorEvent) {
-            // The value of the first subscript in the values array is the current light intensity
-            sensors.dht11.temperature = event.values[0]
-            sensors.dht11.humidity = event.values[1]
-        }
-
-        override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
-        }
-    }
+//    override fun onDestroy() {
+//        super.onDestroy()
+//        sensorManager.unregisterListener(sensorListener)
+//    }
 }
 
 @Composable

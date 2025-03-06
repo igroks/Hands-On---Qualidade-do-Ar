@@ -12,6 +12,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -33,12 +35,12 @@ data class QualityStatus(
 )
 
 @Composable
-fun airQualityStatus(value: Int): QualityStatus {
+fun airQualityStatus(value: MutableState<Int>): QualityStatus {
     val (statusText, statusColor) = when {
-        value <= 40 -> "Boa" to MediumGreen
-        value <= 80 -> "Moderada" to GoldenYellow
-        value <= 120 -> "Ruim" to VividOrange
-        value <= 200 -> "Péssima" to IntenseRed
+        value.value <= 40 -> "Boa" to MediumGreen
+        value.value <= 80 -> "Moderada" to GoldenYellow
+        value.value <= 120 -> "Ruim" to VividOrange
+        value.value <= 200 -> "Péssima" to IntenseRed
         else -> "Crítica" to WinePurple
     }
     return QualityStatus(status = statusText, color = statusColor)
@@ -53,7 +55,7 @@ fun AirQualitySummary(
     co: Float,
 ) {
     val currentTime = remember { mutableStateOf(LocalTime.now()) }
-    val iqa = calculateIQA(pm10, pm25, co)
+    val iqa = remember { mutableIntStateOf(calculateIQA(pm10, pm25, co)) }
     val airQualityStatus = airQualityStatus(iqa)
 
     LaunchedEffect(Unit) {
@@ -93,7 +95,7 @@ fun AirQualitySummary(
                 )
             }
             Text(
-                text = "IQA: $iqa",
+                text = "IQA: ${iqa.value}",
                 style = MaterialTheme.typography.displayMedium.copy(color = Color.White)
             )
             Row(

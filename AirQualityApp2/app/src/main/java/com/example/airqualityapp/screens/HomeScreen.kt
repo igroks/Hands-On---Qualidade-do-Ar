@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -98,42 +99,42 @@ fun HomeScreen(sensors: Sensors, currentTime: LocalTime = LocalTime.now()) {
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun ValueInputScreenPreview1() {
-    AirQualityAppTheme {
-        HomeScreen(sensors = Sensors(DHT11(), SDS011(20f, 35f), MQ9()), LocalTime.of(8, 0))
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ValueInputScreenPreview2() {
-    AirQualityAppTheme {
-        HomeScreen(Sensors(DHT11(), SDS011(40f, 35f), MQ9()), LocalTime.of(16, 0))
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ValueInputScreenPreview3() {
-    AirQualityAppTheme {
-        HomeScreen(Sensors(DHT11(), SDS011(75f, 40f), MQ9()), LocalTime.of(19, 0))
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ValueInputScreenPreview4() {
-    AirQualityAppTheme {
-        HomeScreen(Sensors(DHT11(), SDS011(120f, 100f), MQ9()), LocalTime.of(0, 0))
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ValueInputScreenPreview5() {
-    AirQualityAppTheme {
-        HomeScreen(Sensors(DHT11(25f, 46f), SDS011(200f, 150f), MQ9()), LocalTime.of(7, 0))
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun ValueInputScreenPreview1() {
+//    AirQualityAppTheme {
+//        HomeScreen(sensors = Sensors(DHT11(), SDS011(20f, 35f), MQ9()), LocalTime.of(8, 0))
+//    }
+//}
+//
+//@Preview(showBackground = true)
+//@Composable
+//fun ValueInputScreenPreview2() {
+//    AirQualityAppTheme {
+//        HomeScreen(Sensors(DHT11(), SDS011(40f, 35f), MQ9()), LocalTime.of(16, 0))
+//    }
+//}
+//
+//@Preview(showBackground = true)
+//@Composable
+//fun ValueInputScreenPreview3() {
+//    AirQualityAppTheme {
+//        HomeScreen(Sensors(DHT11(), SDS011(75f, 40f), MQ9()), LocalTime.of(19, 0))
+//    }
+//}
+//
+//@Preview(showBackground = true)
+//@Composable
+//fun ValueInputScreenPreview4() {
+//    AirQualityAppTheme {
+//        HomeScreen(Sensors(DHT11(), SDS011(120f, 100f), MQ9()), LocalTime.of(0, 0))
+//    }
+//}
+//
+//@Preview(showBackground = true)
+//@Composable
+//fun ValueInputScreenPreview5() {
+//    AirQualityAppTheme {
+//        HomeScreen(Sensors(DHT11(25f, 46f), SDS011(200f, 150f), MQ9()), LocalTime.of(7, 0))
+//    }
+//}
