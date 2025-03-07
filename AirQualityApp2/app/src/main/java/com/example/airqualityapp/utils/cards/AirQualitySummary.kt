@@ -35,12 +35,12 @@ data class QualityStatus(
 )
 
 @Composable
-fun airQualityStatus(value: MutableState<Int>): QualityStatus {
+fun airQualityStatus(value: Int): QualityStatus {
     val (statusText, statusColor) = when {
-        value.value <= 40 -> "Boa" to MediumGreen
-        value.value <= 80 -> "Moderada" to GoldenYellow
-        value.value <= 120 -> "Ruim" to VividOrange
-        value.value <= 200 -> "Péssima" to IntenseRed
+        value <= 40 -> "Boa" to MediumGreen
+        value <= 80 -> "Moderada" to GoldenYellow
+        value <= 120 -> "Ruim" to VividOrange
+        value <= 200 -> "Péssima" to IntenseRed
         else -> "Crítica" to WinePurple
     }
     return QualityStatus(status = statusText, color = statusColor)
@@ -50,12 +50,9 @@ fun airQualityStatus(value: MutableState<Int>): QualityStatus {
 fun AirQualitySummary(
     city: String,
     state: String,
-    pm25: Float,
-    pm10: Float,
-    co: Float,
+    iqa: Int = 0,
 ) {
     val currentTime = remember { mutableStateOf(LocalTime.now()) }
-    val iqa = remember { mutableIntStateOf(calculateIQA(pm10, pm25, co)) }
     val airQualityStatus = airQualityStatus(iqa)
 
     LaunchedEffect(Unit) {
@@ -95,7 +92,7 @@ fun AirQualitySummary(
                 )
             }
             Text(
-                text = "IQA: ${iqa.value}",
+                text = "IQA: $iqa",
                 style = MaterialTheme.typography.displayMedium.copy(color = Color.White)
             )
             Row(
@@ -135,7 +132,7 @@ fun ValueInputSummaryPreview() {
                 .background(Color.Black)
                 .padding(16.dp)
         ) {
-            AirQualitySummary("São Paulo", "SP", 15.0f, 40.0f, 9.0f)
+            AirQualitySummary("São Paulo", "SP")
         }
     }
 }

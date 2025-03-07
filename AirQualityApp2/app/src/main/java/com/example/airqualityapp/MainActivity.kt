@@ -40,6 +40,7 @@ import com.example.airqualityapp.screens.MapScreen
 import com.example.airqualityapp.screens.OnboardingScreen
 import com.example.airqualityapp.screens.SplashScreen
 import com.example.airqualityapp.ui.theme.AirQualityAppTheme
+import com.example.airqualityapp.utils.calculateIQA
 import com.example.airqualityapp.utils.getBackgroundGradient
 import org.osmdroid.config.Configuration.getInstance
 
@@ -58,7 +59,8 @@ data class MQ9(var carbonMonoxide: Float = 0.0f)
 data class Sensors(
     val dht11: DHT11 = DHT11(),
     val sds011: SDS011 = SDS011(),
-    val mq9: MQ9 = MQ9()
+    val mq9: MQ9 = MQ9(),
+    val IQA: Int = 0,
 )
 
 class MainActivity : ComponentActivity() {
@@ -77,16 +79,17 @@ class MainActivity : ComponentActivity() {
                 override fun onSensorChanged(event: SensorEvent) {
                     sensors = sensors.copy(
                         mq9 = MQ9(
-                            carbonMonoxide = event.values[5]
+                            carbonMonoxide = event.values[5]/100f
                         ),
                         dht11 = DHT11(
                             temperature = event.values[6],
                             humidity = event.values[7]
                         ),
                         sds011 = SDS011(
-                            pm10 = event.values[0],
-                            pm25 = event.values[1]
-                        )
+                            pm10 = event.values[0]/100f,
+                            pm25 = event.values[1]/100f
+                        ),
+                        IQA = calculateIQA(event.values[0]/100f, event.values[1]/100f, event.values[5]/100f)
                     )
                     Log.d("AirQualityApp", sensors.toString())
                 }

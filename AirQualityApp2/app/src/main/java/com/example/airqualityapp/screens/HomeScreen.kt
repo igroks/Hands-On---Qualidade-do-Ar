@@ -48,9 +48,8 @@ fun HomeScreen(sensors: Sensors, currentTime: LocalTime = LocalTime.now()) {
                 AirQualitySummary(
                     city = "Manaus",
                     state = "AM",
-                    pm25 = sds011.pm25, 
-                    pm10 = sds011.pm10, 
-                    co = mq9.carbonMonoxide)
+                    iqa = sensors.IQA,
+                    )
             }
 
             items(validatedData) {sensorData ->

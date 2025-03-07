@@ -43,7 +43,7 @@ struct AllData {
 int alert = 0;
 float R0 = 9.6;
 
-Float calibrateMq9() {
+float calibrateMq9() {
 	float sensor_volt;
   	float RS_air;
   	float R0;
@@ -157,7 +157,6 @@ void loop() {
   	data3.temperature = temperature;
 
     //alert = digitalRead(DO);
-
     /*
     if (data1.isValid) {
       Serial.println("---Data1---");
